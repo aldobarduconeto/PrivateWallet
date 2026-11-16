@@ -32,13 +32,29 @@ class WalletController {
   int get selected => _selected;
 
   /// Retorna a conta em uso.
-  WalletAccount get account => _accounts[_selected];
+  WalletAccount get account {
+    if (_accounts.isEmpty) {
+      throw StateError('Nenhuma conta cadastrada');
+    }
+    final index = _selected.clamp(0, _accounts.length - 1);
+    return _accounts[index];
+  }
+
+  /// Retorna a conta em uso, ou null se não houver contas.
+  WalletAccount? get accountOrNull {
+    if (_accounts.isEmpty) return null;
+    final index = _selected.clamp(0, _accounts.length - 1);
+    return _accounts[index];
+  }
 
   /// Lê os dados persistidos e prepara o estado em memória.
   Future<void> load() async {
     _accounts = List.unmodifiable(await _store.load());
-    if (_accounts.isNotEmpty && _selected < _accounts.length) {
+    if (_accounts.isNotEmpty) {
+      if (_selected >= _accounts.length) _selected = 0;
       currentAccount = _accounts[_selected];
+    } else {
+      currentAccount = null;
     }
   }
 

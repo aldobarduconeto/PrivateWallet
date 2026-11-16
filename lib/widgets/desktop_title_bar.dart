@@ -81,8 +81,9 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
         bottom: false,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isNarrow = constraints.maxWidth < 620;
-            final isCompactMobile = constraints.maxWidth < 420;
+            final showFullSearchBar = constraints.maxWidth >= 840;
+            final isCompact = constraints.maxWidth < 620;
+            final isVeryCompact = constraints.maxWidth < 460;
             final barHeight = isDesktop ? widget.height : 42.0;
 
             return Container(
@@ -105,20 +106,20 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                     onDoubleTap: isDesktop ? _handleToggleMaximize : null,
                     child: Padding(
                       padding: EdgeInsets.only(
-                        left: isCompactMobile ? 10.0 : 14.0,
-                        right: isCompactMobile ? 6.0 : 10.0,
+                        left: isVeryCompact ? 10.0 : 14.0,
+                        right: isVeryCompact ? 6.0 : 10.0,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.shield_outlined,
-                            size: isCompactMobile ? 14 : 15,
+                            size: isVeryCompact ? 14 : 15,
                             color: theme.colorScheme.primary.withValues(alpha: 0.9),
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            isCompactMobile ? 'PW' : widget.title,
+                            isVeryCompact ? 'PW' : widget.title,
                             style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w700,
@@ -154,12 +155,16 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                                       ),
                                     ),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      label,
-                                      style: TextStyle(
-                                        fontSize: 9.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: badgeColor,
+                                    ConstrainedBox(
+                                      constraints: const BoxConstraints(maxWidth: 130),
+                                      child: Text(
+                                        label,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: badgeColor,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -172,39 +177,34 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                     ),
                   ),
 
-                  // Área central: Busca rápida responsiva
-                  if (!isNarrow) ...[
+                  // Área central: Busca rápida responsiva e arrasto
+                  Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onPanStart: isDesktop ? (_) => DesktopWindowService.startDragging() : null,
+                      onDoubleTap: isDesktop ? _handleToggleMaximize : null,
+                      child: const SizedBox(height: double.infinity),
+                    ),
+                  ),
+
+                  if (showFullSearchBar) ...[
+                    Flexible(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 320),
+                        child: _HeaderSearchBar(
+                          height: 27.0,
+                          shortcutHint: shortcutHint,
+                          onTap: () => HeaderQuickSearchDialog.show(context),
+                        ),
+                      ),
+                    ),
                     Expanded(
-                      flex: 1,
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onPanStart: isDesktop ? (_) => DesktopWindowService.startDragging() : null,
                         onDoubleTap: isDesktop ? _handleToggleMaximize : null,
                         child: const SizedBox(height: double.infinity),
                       ),
-                    ),
-                    _HeaderSearchBar(
-                      height: 27.0,
-                      shortcutHint: shortcutHint,
-                      onTap: () => HeaderQuickSearchDialog.show(context),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onPanStart: isDesktop ? (_) => DesktopWindowService.startDragging() : null,
-                        onDoubleTap: isDesktop ? _handleToggleMaximize : null,
-                        child: const SizedBox(height: double.infinity),
-                      ),
-                    ),
-                  ] else ...[
-                    const Spacer(),
-                    // Em telas menores / celulares, gatilho compacto de busca
-                    _HeaderActionIcon(
-                      icon: Icons.search_rounded,
-                      tooltip: 'Buscar (${shortcutHint})',
-                      color: theme.colorScheme.primary,
-                      onTap: () => HeaderQuickSearchDialog.show(context),
                     ),
                   ],
 
@@ -212,58 +212,68 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Monitor Rápido de Gas
-                      ValueListenableBuilder<GasFeeInfo?>(
-                        valueListenable: cmd.gasInfoNotifier,
-                        builder: (context, info, _) {
-                          final gwei = info?.ethNormalGwei ?? 24;
-                          return Tooltip(
-                            message: 'Taxa de Gas estimada na rede (${gwei} Gwei).\nToque para abrir o Radar de Gas.',
-                            child: InkWell(
-                              onTap: () => cmd.onOpenGasTracker?.call(),
-                              borderRadius: BorderRadius.circular(6),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                margin: const EdgeInsets.symmetric(horizontal: 3),
-                                decoration: BoxDecoration(
-                                  color: Colors.deepOrange.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: Colors.deepOrange.withValues(alpha: 0.25), width: 0.8),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.speed, size: 12, color: Colors.deepOrange),
-                                    const SizedBox(width: 3.5),
-                                    Text(
-                                      '$gwei Gwei',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.deepOrange,
+                      if (!showFullSearchBar)
+                        _HeaderActionIcon(
+                          icon: Icons.search_rounded,
+                          tooltip: 'Buscar ($shortcutHint)',
+                          color: theme.colorScheme.primary,
+                          onTap: () => HeaderQuickSearchDialog.show(context),
+                        ),
+                      if (!isVeryCompact)
+                        // Monitor Rápido de Gas
+                        ValueListenableBuilder<GasFeeInfo?>(
+                          valueListenable: cmd.gasInfoNotifier,
+                          builder: (context, info, _) {
+                            final gwei = info?.ethNormalGwei ?? 24;
+                            return Tooltip(
+                              message: 'Taxa de Gas estimada na rede (${gwei} Gwei).\nToque para abrir o Radar de Gas.',
+                              child: InkWell(
+                                onTap: () => cmd.onOpenGasTracker?.call(),
+                                borderRadius: BorderRadius.circular(6),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.deepOrange.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: Colors.deepOrange.withValues(alpha: 0.25), width: 0.8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.speed, size: 12, color: Colors.deepOrange),
+                                      const SizedBox(width: 3.5),
+                                      Text(
+                                        '$gwei Gwei',
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.deepOrange,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                            );
+                          },
+                        ),
 
-                      // Inspetor Anti-Golpe (Verificar Endereço)
-                      _HeaderActionIcon(
-                        icon: Icons.manage_search_rounded,
-                        tooltip: 'Checar endereço seguro',
-                        onTap: () => cmd.onOpenAddressInspector?.call(),
-                      ),
+                      if (!isCompact) ...[
+                        // Inspetor Anti-Golpe (Verificar Endereço)
+                        _HeaderActionIcon(
+                          icon: Icons.manage_search_rounded,
+                          tooltip: 'Checar endereço seguro',
+                          onTap: () => cmd.onOpenAddressInspector?.call(),
+                        ),
 
-                      // Limpar Área de Transferência Imediatamente
-                      _HeaderActionIcon(
-                        icon: Icons.cleaning_services_outlined,
-                        tooltip: 'Limpar texto copiado do aparelho',
-                        onTap: () => cmd.cleanClipboard(context),
-                      ),
+                        // Limpar Área de Transferência Imediatamente
+                        _HeaderActionIcon(
+                          icon: Icons.cleaning_services_outlined,
+                          tooltip: 'Limpar texto copiado do aparelho',
+                          onTap: () => cmd.cleanClipboard(context),
+                        ),
+                      ],
 
                       // Alternar Privacidade / Modo Discreto de Saldos
                       ValueListenableBuilder<bool>(
@@ -372,7 +382,6 @@ class _HeaderSearchBarState extends State<_HeaderSearchBar> {
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         child: Container(
-          width: 320,
           height: widget.height,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(

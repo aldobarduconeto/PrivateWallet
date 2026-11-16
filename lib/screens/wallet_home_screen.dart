@@ -154,6 +154,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Retorna o rótulo da rede em uso.
   String get _networkLabel {
+    if (_accounts.isEmpty) return _network.label;
     if (_account.isMultiCoin) {
       final btc = _account.bitcoinChain?.label ?? 'Testnet4';
       return 'Multi-Moeda · ${_network.label} & $btc';
@@ -163,6 +164,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Formata o valor.
   String _formatAmount(BigInt amount) {
+    if (_accounts.isEmpty) return formatEth(amount);
     final isBtc = _account.isMultiCoin
         ? _account.activeAsset == 'BTC'
         : _account.bitcoinChain != null;
@@ -171,6 +173,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Prepara a solicitação de pagamento para compartilhar.
   String _paymentRequest(String address, BigInt? amount) {
+    if (_accounts.isEmpty) return '';
     final isBtc = _account.isMultiCoin
         ? _account.activeAsset == 'BTC'
         : _account.bitcoinChain != null;
@@ -187,6 +190,10 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     super.initState();
     _controller = WalletController(widget.preferences.value.ethereumNetwork);
     _hideBalance = widget.preferences.value.hideBalanceAtStartup;
+    _balance = Future.value(BigInt.zero);
+    _portfolioValue = Future.value((wallets: <double?>[], total: null));
+    _exchangeRate = Future.value(null);
+
     final prefs = widget.preferences.value;
     if ((prefs.biometricAuthEnabled && AuthProtectionService.isMobile) ||
         prefs.desktopPasswordEnabled) {
@@ -194,17 +201,38 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     }
 
     final cmd = HeaderCommandService.instance;
-    cmd.onOpenSend = () => _send();
-    cmd.onOpenReceive = () => _receive();
-    cmd.onOpenStatement = () => _openStatement();
-    cmd.onOpenFinance = () => _openFinance();
-    cmd.onOpenPos = () => _openPos();
+    cmd.onOpenSend = () {
+      if (_accounts.isEmpty) return;
+      _send();
+    };
+    cmd.onOpenReceive = () {
+      if (_accounts.isEmpty) return;
+      _receive();
+    };
+    cmd.onOpenStatement = () {
+      if (_accounts.isEmpty) return;
+      _openStatement();
+    };
+    cmd.onOpenFinance = () {
+      if (_accounts.isEmpty) return;
+      _openFinance();
+    };
+    cmd.onOpenPos = () {
+      if (_accounts.isEmpty) return;
+      _openPos();
+    };
     cmd.onOpenGasTracker = () => _openGasTracker();
     cmd.onOpenPrivacyStealth = () => _openPrivacyStealth();
-    cmd.onOpenAddressInspector = () => _openAddressInspector();
+    cmd.onOpenAddressInspector = () {
+      if (_accounts.isEmpty) return;
+      _openAddressInspector();
+    };
     cmd.onOpenMarket = () => _openMarket();
     cmd.onOpenContacts = () => _openContacts();
-    cmd.onOpenAutoDebits = () => _openAutoDebits();
+    cmd.onOpenAutoDebits = () {
+      if (_accounts.isEmpty) return;
+      _openAutoDebits();
+    };
     cmd.onOpenSettings = () => _openSettings();
     cmd.onToggleHideBalance = () {
       if (mounted) {
@@ -290,6 +318,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
       setState(() {
         _loading = false;
         _loadFailed = false;
+        cmd.networkLabelNotifier.value = _networkLabel;
         if (_accounts.isNotEmpty) {
           _refreshBalance();
           BackgroundSyncService.instance.start(
@@ -301,7 +330,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
           );
         }
       });
-    } on Exception {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         _loading = false;
@@ -575,7 +604,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Abre a exportação de carteiras por código QR.
   Future<void> _exportQr({bool isMirror = false}) => _action(() async {
-    if (!mounted) return;
+    if (!mounted || _accounts.isEmpty) return;
     await showDialog<void>(
       context: context,
       builder: (_) => WalletExportDialog(
@@ -588,7 +617,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Abre as opções de recebimento da carteira selecionada.
   Future<void> _receive() async {
-    if (_busy) return;
+    if (_busy || _accounts.isEmpty) return;
     await CryptoReceiveQrSheet.show(
       context,
       account: _account,
@@ -601,6 +630,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     bool purchase = false,
     String? initialAddress,
   }) => _action(() async {
+    if (_accounts.isEmpty) return;
     final account = _account;
     final network = _network;
     final bitcoin = account.bitcoinChain;
@@ -884,7 +914,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Abre o extrato.
   Future<void> _openStatement() async {
-    if (_busy) return;
+    if (_busy || _accounts.isEmpty) return;
     final account = _account;
     final bitcoin = account.bitcoinChain;
     final addressExplorer = bitcoin == null
@@ -911,7 +941,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Abre as ferramentas financeiras.
   Future<void> _openFinance() async {
-    if (_busy) return;
+    if (_busy || _accounts.isEmpty) return;
     final balance = _controller.lastKnownBalance() ?? BigInt.zero;
     await Navigator.push<void>(
       context,
@@ -934,7 +964,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Abre os débitos automáticos.
   Future<void> _openAutoDebits() async {
-    if (_busy) return;
+    if (_busy || _accounts.isEmpty) return;
     await Navigator.push<void>(
       context,
       MaterialPageRoute(
