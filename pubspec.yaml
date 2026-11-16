@@ -1,0 +1,38 @@
+name: private_wallet
+description: "Carteira crypto com autocustÃ³dia e pedidos de pagamento."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.3
+  cupertino_icons: ^1.0.8
+  wallet: ^0.0.18
+  web3dart: ^3.0.3
+  flutter_secure_storage: ^11.2.0
+  qr_flutter: ^4.1.0
+  http: ^1.6.0
+  url_launcher: ^6.3.3
+  cryptography: ^2.9.0
+  mobile_scanner: ^7.5.0
+  file_selector: ^1.1.0
+  image: ^4.12.0
+  zxing2: ^0.2.4
+  bitcoin_base: ^7.3.0
+  package_info_plus: ^10.2.2
+  device_info_plus: ^13.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  assets:
+    - assets/wallet_icon.png
+  uses-material-design: true
