@@ -318,7 +318,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
       setState(() {
         _loading = false;
         _loadFailed = false;
-        cmd.networkLabelNotifier.value = _networkLabel;
+        HeaderCommandService.instance.networkLabelNotifier.value = _networkLabel;
         if (_accounts.isNotEmpty) {
           _refreshBalance();
           BackgroundSyncService.instance.start(
