@@ -68,7 +68,6 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
     final isDesktop = DesktopWindowService.isDesktop;
 
     final bgColor = theme.scaffoldBackgroundColor;
-    final borderColor = (isDark ? Colors.white : Colors.black).withValues(alpha: 0.07);
     final foregroundColor = theme.colorScheme.onSurface.withValues(alpha: 0.75);
     final cmd = HeaderCommandService.instance;
 
