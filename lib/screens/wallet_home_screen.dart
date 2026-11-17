@@ -1282,50 +1282,60 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
   }
 
   /// Monta o cabeçalho com o estado atual.
-  Widget _header() => Material(
-    color: Theme.of(context).scaffoldBackgroundColor,
-    child: SafeArea(
-      bottom: false,
-      child: Column(
-        children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1440),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isWideDesktop = constraints.maxWidth >= 840;
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                'assets/wallet_icon.png',
-                                width: isWideDesktop ? 38 : 32,
-                                height: isWideDesktop ? 38 : 32,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Private Wallet',
-                              style: TextStyle(
-                                fontSize: isWideDesktop ? 19 : 17,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            if (_accounts.isNotEmpty && !_loading) ...[
-                              const SizedBox(width: 8),
-                              _networkBadge(),
-                            ],
-                            const Spacer(),
+  Widget _header() {
+    final isDesktop = DesktopWindowService.isDesktop;
+    // No desktop, a DesktopTitleBar já atua como cabeçalho superior unificado.
+    // Quando não há contas cadastradas, evitamos duplicar a barra de título/logo no corpo.
+    if (isDesktop && _accounts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1440),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: isDesktop ? 6 : 12,
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWideDesktop = constraints.maxWidth >= 840;
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              if (!isDesktop) ...[
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.asset(
+                                    'assets/wallet_icon.png',
+                                    width: isWideDesktop ? 38 : 32,
+                                    height: isWideDesktop ? 38 : 32,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Private Wallet',
+                                  style: TextStyle(
+                                    fontSize: isWideDesktop ? 19 : 17,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                if (_accounts.isNotEmpty && !_loading) ...[
+                                  const SizedBox(width: 8),
+                                  _networkBadge(),
+                                ],
+                              ],
+                              const Spacer(),
                             if (isWideDesktop &&
                                 !_loading &&
                                 !_loadFailed &&
@@ -1570,6 +1580,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
       ),
     ),
   );
+  }
 
   /// Informa a falha de armazenamento na interface.
   Widget _storageError() => Center(

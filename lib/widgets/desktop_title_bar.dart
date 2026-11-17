@@ -26,7 +26,7 @@ class DesktopTitleBar extends StatefulWidget {
   /// Inicializa [DesktopTitleBar].
   const DesktopTitleBar({
     super.key,
-    this.height = 38.0,
+    this.height = 40.0,
     this.title = 'Private Wallet',
   });
 
@@ -269,7 +269,7 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
 
                         // Limpar Área de Transferência Imediatamente
                         _HeaderActionIcon(
-                          icon: Icons.cleaning_services_outlined,
+                          icon: Icons.cleaning_services,
                           tooltip: 'Limpar texto copiado do aparelho',
                           onTap: () => cmd.cleanClipboard(context),
                         ),
@@ -288,6 +288,13 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                         },
                       ),
 
+                      if (isDesktop)
+                        _HeaderActionIcon(
+                          icon: Icons.settings_outlined,
+                          tooltip: 'Configurações',
+                          onTap: () => cmd.onOpenSettings?.call(),
+                        ),
+
                       // Controles de Janela Minimalistas (Exibidos apenas em Desktop: Windows, Linux, macOS)
                       if (isDesktop) ...[
                         const SizedBox(width: 3),
@@ -298,7 +305,6 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                           margin: const EdgeInsets.symmetric(horizontal: 4),
                         ),
                         _WindowButton(
-                          height: barHeight,
                           tooltip: 'Minimizar',
                           hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.08),
                           onTap: DesktopWindowService.minimize,
@@ -309,7 +315,6 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                           ),
                         ),
                         _WindowButton(
-                          height: barHeight,
                           tooltip: _isMaximized ? 'Restaurar' : 'Maximizar',
                           hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.08),
                           onTap: _handleToggleMaximize,
@@ -318,7 +323,6 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                               : _MaximizeIcon(color: foregroundColor),
                         ),
                         _WindowButton(
-                          height: barHeight,
                           tooltip: 'Fechar',
                           hoverColor: const Color(0xFFE81123),
                           hoverIconColor: Colors.white,
@@ -440,6 +444,7 @@ class _HeaderActionIcon extends StatelessWidget {
   final Color? color;
 
   const _HeaderActionIcon({
+    super.key,
     required this.icon,
     required this.tooltip,
     required this.onTap,
@@ -458,7 +463,7 @@ class _HeaderActionIcon extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(6),
         child: Padding(
-          padding: const EdgeInsets.all(5.5),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
           child: Icon(
             icon,
             size: 16,
@@ -536,7 +541,6 @@ class _RestoreIcon extends StatelessWidget {
 
 /// Botão de controle de janela com efeito hover responsivo e visual limpo.
 class _WindowButton extends StatefulWidget {
-  final double height;
   final Widget child;
   final String tooltip;
   final Color hoverColor;
@@ -544,7 +548,6 @@ class _WindowButton extends StatefulWidget {
   final VoidCallback onTap;
 
   const _WindowButton({
-    required this.height,
     required this.child,
     required this.tooltip,
     required this.hoverColor,
@@ -581,7 +584,7 @@ class _WindowButtonState extends State<_WindowButton> {
           onTap: widget.onTap,
           child: Container(
             width: 44,
-            height: widget.height,
+            height: double.infinity,
             color: _isHovered ? widget.hoverColor : Colors.transparent,
             alignment: Alignment.center,
             child: content,
