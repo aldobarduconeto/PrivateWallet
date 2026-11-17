@@ -217,11 +217,12 @@ class _CryptoPosScreenState extends State<CryptoPosScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Cobrança Rápida & PDV')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: ListView(
-            padding: const EdgeInsets.all(20),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 840;
+
+          final formInputs = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Cabeçalho explicativo
               Container(
@@ -392,9 +393,12 @@ class _CryptoPosScreenState extends State<CryptoPosScreen> {
                 ),
                 onChanged: (_) => _calculateCrypto(),
               ),
-              const SizedBox(height: 20),
+            ],
+          );
 
-              // Card do QR Code e Equivalência
+          final qrOutput = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               if (_qrGenerated && _fiatAmount > 0) ...[
                 Card(
                   elevation: 2,
@@ -438,7 +442,7 @@ class _CryptoPosScreenState extends State<CryptoPosScreen> {
                         const SizedBox(height: 16),
                         QrImageView(
                           data: _paymentUri,
-                          size: 220,
+                          size: isWide ? 240 : 210,
                           backgroundColor: Colors.white,
                           padding: EdgeInsets.zero,
                         ),
@@ -497,7 +501,7 @@ class _CryptoPosScreenState extends State<CryptoPosScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Digite um valor acima para gerar o QR Code com o valor equivalente em cripto.',
+                          'Digite um valor ao lado para gerar o QR Code com o valor equivalente em cripto.',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: colors.onSurfaceVariant),
                         ),
@@ -507,9 +511,38 @@ class _CryptoPosScreenState extends State<CryptoPosScreen> {
                 ),
               ],
             ],
-          ),
-        ),
-      ),
+          );
+
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: isWide ? 1040 : 560),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: constraints.maxWidth < 400 ? 14 : 20,
+                  vertical: 20,
+                ),
+                child: isWide
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 5, child: formInputs),
+                          const SizedBox(width: 28),
+                          Expanded(flex: 5, child: qrOutput),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          formInputs,
+                          const SizedBox(height: 20),
+                          qrOutput,
+                        ],
+                      ),
+              ),
+            ),
+          );
+        },
+      ),,
     );
   }
 }

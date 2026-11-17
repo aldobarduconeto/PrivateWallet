@@ -89,265 +89,320 @@ class _GasTrackerScreenState extends State<GasTrackerScreen> {
       ),
       body: _loading || info == null
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // Seletor de Rede
-                  SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment(
-                        value: 'ETH',
-                        label: Text('Ethereum (Gwei)'),
-                        icon: Icon(Icons.toll),
-                      ),
-                      ButtonSegment(
-                        value: 'BTC',
-                        label: Text('Bitcoin (sat/vB)'),
-                        icon: Icon(Icons.currency_bitcoin),
-                      ),
-                    ],
-                    selected: {_selectedChain},
-                    onSelectionChanged: (set) =>
-                        setState(() => _selectedChain = set.first),
-                  ),
-                  const SizedBox(height: 16),
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 760;
 
-                  // Banner de Tráfego e Recomendação
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: colors.primaryContainer.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: colors.primary.withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.speed, color: colors.primary, size: 30),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Congestionamento da Rede: ${info.congestionLevel}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                info.recommendation,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: colors.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                '💡 Transações enviadas em horários de menor congestionamento economizam gas. Configure um alarme abaixo para ser alertado quando a taxa atingir o valor ideal.',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: colors.onSurfaceVariant.withValues(alpha: 0.85),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Cards de Velocidade (Lenta, Normal, Rápida)
-                  if (_selectedChain == 'ETH') ...[
-                    _buildTierCard(
-                      title: 'Econômica (Baixa prioridade)',
-                      subtitle: 'Tempo estimado: ~3 a 5 min',
-                      rate: '${info.ethSlowGwei} Gwei',
-                      costBrl:
-                          '≈ R\$ ${info.ethCostBrl(info.ethSlowGwei).toStringAsFixed(2)}',
-                      color: Colors.green,
-                      icon: Icons.savings_outlined,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTierCard(
-                      title: 'Padrão (Recomendada)',
-                      subtitle: 'Tempo estimado: ~30 segundos',
-                      rate: '${info.ethNormalGwei} Gwei',
-                      costBrl:
-                          '≈ R\$ ${info.ethCostBrl(info.ethNormalGwei).toStringAsFixed(2)}',
-                      color: Colors.blue,
-                      icon: Icons.check_circle_outline,
-                      isRecommended: true,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTierCard(
-                      title: 'Prioridade Alta (Rápida)',
-                      subtitle: 'Tempo estimado: Próximo bloco (~12s)',
-                      rate: '${info.ethFastGwei} Gwei',
-                      costBrl:
-                          '≈ R\$ ${info.ethCostBrl(info.ethFastGwei).toStringAsFixed(2)}',
-                      color: Colors.orange,
-                      icon: Icons.flash_on,
-                    ),
-                  ] else ...[
-                    _buildTierCard(
-                      title: 'Baixa Prioridade',
-                      subtitle:
-                          'Tempo estimado: ~1 a 2 horas (próximos blocos)',
-                      rate: '${info.btcSlowSatVb} sat/vB',
-                      costBrl:
-                          '≈ R\$ ${info.btcCostBrl(info.btcSlowSatVb).toStringAsFixed(2)}',
-                      color: Colors.green,
-                      icon: Icons.savings_outlined,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTierCard(
-                      title: 'Média Prioridade (Recomendada)',
-                      subtitle: 'Tempo estimado: ~20 a 30 minutos',
-                      rate: '${info.btcNormalSatVb} sat/vB',
-                      costBrl:
-                          '≈ R\$ ${info.btcCostBrl(info.btcNormalSatVb).toStringAsFixed(2)}',
-                      color: Colors.blue,
-                      icon: Icons.check_circle_outline,
-                      isRecommended: true,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTierCard(
-                      title: 'Alta Prioridade',
-                      subtitle: 'Tempo estimado: Próximo bloco (~10 min)',
-                      rate: '${info.btcFastSatVb} sat/vB',
-                      costBrl:
-                          '≈ R\$ ${info.btcCostBrl(info.btcFastSatVb).toStringAsFixed(2)}',
-                      color: Colors.orange,
-                      icon: Icons.flash_on,
-                    ),
-                  ],
-
-                  const SizedBox(height: 24),
-                  const Divider(),
-                  const SizedBox(height: 12),
-
-                  // Seção: Alarme de Gas Barato
-                  const Text(
-                    'Alarme de Gas Econômico',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Seja notificado quando as taxas caírem para enviar transações pelo menor preço possível.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _targetGweiController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'Avisar se o Gas cair para (Gwei)',
-                            suffixText: 'Gwei',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      FilledButton.icon(
-                        onPressed: _saveGasAlert,
-                        icon: const Icon(Icons.notifications_active),
-                        label: const Text('Salvar'),
-                      ),
-                    ],
-                  ),
-                  if (_savedTarget != null) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.check_circle,
+                final tierCards = _selectedChain == 'ETH'
+                    ? [
+                        _buildTierCard(
+                          title: 'Econômica (Baixa)',
+                          subtitle: 'Tempo estimado: ~3 a 5 min',
+                          rate: '${info.ethSlowGwei} Gwei',
+                          costBrl:
+                              '≈ R\$ ${info.ethCostBrl(info.ethSlowGwei).toStringAsFixed(2)}',
                           color: Colors.green,
-                          size: 16,
+                          icon: Icons.savings_outlined,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Alarme ativo para <= $_savedTarget Gwei.',
-                          style: const TextStyle(
-                            color: Colors.green,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        _buildTierCard(
+                          title: 'Padrão (Recomendada)',
+                          subtitle: 'Tempo estimado: ~30 segundos',
+                          rate: '${info.ethNormalGwei} Gwei',
+                          costBrl:
+                              '≈ R\$ ${info.ethCostBrl(info.ethNormalGwei).toStringAsFixed(2)}',
+                          color: Colors.blue,
+                          icon: Icons.check_circle_outline,
+                          isRecommended: true,
                         ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: () {
-                            _targetGweiController.clear();
-                            _saveGasAlert();
-                          },
-                          child: const Text(
-                            'Desativar',
-                            style: TextStyle(fontSize: 12),
-                          ),
+                        _buildTierCard(
+                          title: 'Prioridade Alta',
+                          subtitle: 'Tempo estimado: ~12s (próximo bloco)',
+                          rate: '${info.ethFastGwei} Gwei',
+                          costBrl:
+                              '≈ R\$ ${info.ethCostBrl(info.ethFastGwei).toStringAsFixed(2)}',
+                          color: Colors.orange,
+                          icon: Icons.flash_on,
                         ),
-                      ],
-                    ),
-                  ],
+                      ]
+                    : [
+                        _buildTierCard(
+                          title: 'Baixa Prioridade',
+                          subtitle:
+                              'Tempo estimado: ~1 a 2h (próximos blocos)',
+                          rate: '${info.btcSlowSatVb} sat/vB',
+                          costBrl:
+                              '≈ R\$ ${info.btcCostBrl(info.btcSlowSatVb).toStringAsFixed(2)}',
+                          color: Colors.green,
+                          icon: Icons.savings_outlined,
+                        ),
+                        _buildTierCard(
+                          title: 'Média (Recomendada)',
+                          subtitle: 'Tempo estimado: ~20 a 30 minutos',
+                          rate: '${info.btcNormalSatVb} sat/vB',
+                          costBrl:
+                              '≈ R\$ ${info.btcCostBrl(info.btcNormalSatVb).toStringAsFixed(2)}',
+                          color: Colors.blue,
+                          icon: Icons.check_circle_outline,
+                          isRecommended: true,
+                        ),
+                        _buildTierCard(
+                          title: 'Alta Prioridade',
+                          subtitle: 'Tempo estimado: Próximo bloco (~10 min)',
+                          rate: '${info.btcFastSatVb} sat/vB',
+                          costBrl:
+                              '≈ R\$ ${info.btcCostBrl(info.btcFastSatVb).toStringAsFixed(2)}',
+                          color: Colors.orange,
+                          icon: Icons.flash_on,
+                        ),
+                      ];
 
-                  const SizedBox(height: 24),
-                  // Dicas de Economia Soberana
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerHighest.withValues(
-                        alpha: 0.4,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
+                final alarmCard = Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainer,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: colors.outlineVariant.withValues(alpha: 0.5),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.lightbulb_outline,
-                              color: Colors.amber,
-                              size: 20,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Alarme de Gas Econômico',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Seja notificado quando as taxas caírem para enviar pelo menor preço.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _targetGweiController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Avisar se o Gas cair para (Gwei)',
+                                suffixText: 'Gwei',
+                                border: OutlineInputBorder(),
+                              ),
                             ),
-                            SizedBox(width: 8),
+                          ),
+                          const SizedBox(width: 10),
+                          FilledButton.icon(
+                            onPressed: _saveGasAlert,
+                            icon: const Icon(Icons.notifications_active),
+                            label: const Text('Salvar'),
+                          ),
+                        ],
+                      ),
+                      if (_savedTarget != null) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
                             Text(
-                              'Dica de Economia Soberana',
-                              style: TextStyle(
+                              'Alarme ativo para <= $_savedTarget Gwei.',
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                              ),
+                            ),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: () {
+                                _targetGweiController.clear();
+                                _saveGasAlert();
+                              },
+                              child: const Text(
+                                'Desativar',
+                                style: TextStyle(fontSize: 12),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '• As taxas de rede on-chain variam de acordo com o tráfego global.\n'
-                          '• Domingos e madrugadas (01h às 06h UTC-3) chegam a ter taxas até 70% menores do que o horário comercial em dias úteis.\n'
-                          '• Para pagamentos não urgentes, sempre use a prioridade Econômica.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colors.onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        ),
                       ],
+                    ],
+                  ),
+                );
+
+                final tipsCard = Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withValues(
+                      alpha: 0.4,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: colors.outlineVariant.withValues(alpha: 0.4),
                     ),
                   ),
-                ],
-              ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: Colors.amber,
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Dica de Economia Soberana',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '• As taxas de rede variam com o tráfego global on-chain.\n'
+                        '• Domingos e madrugadas (01h às 06h UTC-3) chegam a ter taxas até 70% menores do que o horário comercial em dias úteis.\n'
+                        '• Para pagamentos não urgentes, sempre use a prioridade Econômica.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colors.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                return RefreshIndicator(
+                  onRefresh: _load,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1100),
+                      child: ListView(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: constraints.maxWidth < 400 ? 12 : 20,
+                          vertical: 16,
+                        ),
+                        children: [
+                          // Seletor de Rede
+                          SegmentedButton<String>(
+                            segments: const [
+                              ButtonSegment(
+                                value: 'ETH',
+                                label: Text('Ethereum (Gwei)'),
+                                icon: Icon(Icons.toll),
+                              ),
+                              ButtonSegment(
+                                value: 'BTC',
+                                label: Text('Bitcoin (sat/vB)'),
+                                icon: Icon(Icons.currency_bitcoin),
+                              ),
+                            ],
+                            selected: {_selectedChain},
+                            onSelectionChanged: (set) =>
+                                setState(() => _selectedChain = set.first),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Banner de Tráfego e Recomendação
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: colors.primaryContainer.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: colors.primary.withValues(alpha: 0.25),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.speed, color: colors.primary, size: 30),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Congestionamento da Rede: ${info.congestionLevel}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        info.recommendation,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: colors.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+
+                          // Cards de Velocidade Responsivos
+                          if (isWide)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (var i = 0; i < tierCards.length; i++) ...[
+                                  if (i > 0) const SizedBox(width: 14),
+                                  Expanded(child: tierCards[i]),
+                                ],
+                              ],
+                            )
+                          else
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (var i = 0; i < tierCards.length; i++) ...[
+                                  if (i > 0) const SizedBox(height: 10),
+                                  tierCards[i],
+                                ],
+                              ],
+                            ),
+
+                          const SizedBox(height: 24),
+                          const Divider(),
+                          const SizedBox(height: 16),
+
+                          // Alarme & Dicas Lado a Lado no Desktop / Tablet
+                          if (isWide)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: alarmCard),
+                                const SizedBox(width: 18),
+                                Expanded(child: tipsCard),
+                              ],
+                            )
+                          else ...[
+                            alarmCard,
+                            const SizedBox(height: 16),
+                            tipsCard,
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
     );
   }

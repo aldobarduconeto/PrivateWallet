@@ -273,9 +273,12 @@ class _WalletAccountScreenState extends State<WalletAccountScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Gerenciamento da Conta')),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
             // Card Principal de Perfil & Identidade
             BalanceCard(
               child: Column(
@@ -619,7 +622,9 @@ class _WalletAccountScreenState extends State<WalletAccountScreen> {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

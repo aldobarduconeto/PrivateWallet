@@ -13,7 +13,10 @@ class WalletPanel extends StatelessWidget {
     clipBehavior: Clip.antiAlias,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
-      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+      side: BorderSide(
+        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.65),
+        width: 1.0,
+      ),
     ),
     child: Padding(padding: const EdgeInsets.all(20), child: child),
   );
@@ -32,25 +35,32 @@ class AssetMark extends StatelessWidget {
     final bitcoin = symbol == 'BTC';
     final colors = Theme.of(context).colorScheme;
     final dark = colors.brightness == Brightness.dark;
+    final primaryColor = bitcoin
+        ? const Color(0xfff7931a)
+        : const Color(0xff627eea);
+    final bgColor = bitcoin
+        ? (dark ? const Color(0x33f7931a) : const Color(0xfffff7ed))
+        : (dark ? const Color(0x33627eea) : const Color(0xffeef2ff));
+
     return ExcludeSemantics(
       child: Container(
         width: size,
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: bitcoin
-              ? (dark ? const Color(0xff553920) : const Color(0xffffead3))
-              : colors.secondaryContainer,
-          borderRadius: BorderRadius.circular(size / 3),
+          color: bgColor,
+          borderRadius: BorderRadius.circular(size / 3.2),
+          border: Border.all(
+            color: primaryColor.withValues(alpha: dark ? 0.35 : 0.25),
+            width: 1.0,
+          ),
         ),
         child: Text(
           bitcoin ? '₿' : 'Ξ',
           style: TextStyle(
-            color: bitcoin
-                ? (dark ? const Color(0xffffbd76) : const Color(0xff9b470a))
-                : colors.primary,
-            fontSize: size * .55,
-            fontWeight: FontWeight.w700,
+            color: primaryColor,
+            fontSize: size * .52,
+            fontWeight: FontWeight.w800,
             height: 1,
           ),
         ),
@@ -73,7 +83,11 @@ class WalletSectionTitle extends StatelessWidget {
       Expanded(
         child: Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+          ),
         ),
       ),
       ?trailing,
@@ -89,28 +103,35 @@ class BalanceCard extends StatelessWidget {
 
   /// Monta a interface a partir do estado atual e do tema do contexto.
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(24),
-    child: DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xff162440), Color(0xff202d56), Color(0xff35357b)],
-        ),
+  Widget build(BuildContext context) => Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(
+        color: Colors.white.withValues(alpha: 0.12),
+        width: 1.0,
       ),
-      child: Stack(
-        children: [
-          // O padrão decorativo é estático: isolado numa camada própria, não
-          // é repintado quando o saldo ou os botões mudam.
-          const Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(painter: _BalancePattern()),
-            ),
-          ),
-          Padding(padding: const EdgeInsets.all(22), child: child),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color(0xff0c1322),
+          Color(0xff16223e),
+          Color(0xff1f2252),
         ],
       ),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: Stack(
+      children: [
+        // O padrão decorativo é estático: isolado numa camada própria, não
+        // é repintado quando o saldo ou os botões mudam.
+        const Positioned.fill(
+          child: RepaintBoundary(
+            child: CustomPaint(painter: _BalancePattern()),
+          ),
+        ),
+        Padding(padding: const EdgeInsets.all(22), child: child),
+      ],
     ),
   );
 }
@@ -122,19 +143,26 @@ class _BalancePattern extends CustomPainter {
   /// Desenha o gráfico no canvas dentro da área recebida.
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width + 14, 25);
+    final center = Offset(size.width + 16, 20);
     final line = Paint()
-      ..color = const Color(0x22b7b9ff)
+      ..color = const Color(0x18818cf8)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
-    for (var radius = 72.0; radius <= 176; radius += 24) {
+    for (var radius = 64.0; radius <= 200; radius += 28) {
       canvas.drawCircle(center, radius, line);
     }
     final glow = Paint()
       ..shader = const RadialGradient(
-        colors: [Color(0x33817af9), Color(0x00817af9)],
-      ).createShader(Rect.fromCircle(center: center, radius: 200));
-    canvas.drawCircle(center, 200, glow);
+        colors: [Color(0x286366f1), Color(0x006366f1)],
+      ).createShader(Rect.fromCircle(center: center, radius: 220));
+    canvas.drawCircle(center, 220, glow);
+
+    // Destaque suave no canto inferior esquerdo
+    final bottomGlow = Paint()
+      ..shader = const RadialGradient(
+        colors: [Color(0x1a38bdf8), Color(0x0038bdf8)],
+      ).createShader(Rect.fromCircle(center: Offset(0, size.height), radius: 140));
+    canvas.drawCircle(Offset(0, size.height), 140, bottomGlow);
   }
 
   /// Indica se a mudança nos dados exige redesenhar o gráfico.
@@ -151,34 +179,53 @@ class NetworkBadge extends StatelessWidget {
 
   /// Monta a interface a partir do estado atual e do tema do contexto.
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-    decoration: BoxDecoration(
-      color: const Color(0x1fffffff),
-      borderRadius: BorderRadius.circular(24),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.circle,
-          size: 8,
-          color: isTest ? const Color(0xffffd68f) : const Color(0xff91efce),
+  Widget build(BuildContext context) {
+    final dotColor = isTest ? const Color(0xfffbbf24) : const Color(0xff34d399);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.28),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.12),
+          width: 1.0,
         ),
-        const SizedBox(width: 7),
-        Flexible(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              color: dotColor,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: dotColor.withValues(alpha: 0.5),
+                  blurRadius: 4,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
           ),
-        ),
-      ],
-    ),
-  );
+          const SizedBox(width: 7),
+          Flexible(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 11.5,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Atalho de ação rápida do painel (ícone em destaque + rótulo).
@@ -208,8 +255,11 @@ class QuickAction extends StatelessWidget {
       child: Material(
         color: colors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: colors.outlineVariant),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: colors.outlineVariant.withValues(alpha: 0.7),
+            width: 1.0,
+          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -227,10 +277,11 @@ class QuickAction extends StatelessWidget {
                     color: enabled
                         ? colors.secondaryContainer
                         : colors.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(13),
                   ),
                   child: Icon(
                     icon,
+                    size: 21,
                     color: enabled ? colors.primary : colors.onSurfaceVariant,
                   ),
                 ),
@@ -240,8 +291,9 @@ class QuickAction extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w600,
+                    letterSpacing: -0.2,
                     color: enabled ? colors.onSurface : colors.onSurfaceVariant,
                   ),
                 ),

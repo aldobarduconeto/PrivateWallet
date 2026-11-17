@@ -1248,14 +1248,18 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                         child: SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: EdgeInsets.fromLTRB(
-                            viewport.maxWidth >= 680 ? 32 : 16,
-                            viewport.maxWidth >= 680 ? 30 : 20,
-                            viewport.maxWidth >= 680 ? 32 : 16,
+                            viewport.maxWidth >= 680
+                                ? 32
+                                : (viewport.maxWidth < 360 ? 12 : 16),
+                            viewport.maxWidth >= 680 ? 30 : 16,
+                            viewport.maxWidth >= 680
+                                ? 32
+                                : (viewport.maxWidth < 360 ? 12 : 16),
                             32,
                           ),
                           child: Center(
                             child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 1440),
+                              constraints: const BoxConstraints(maxWidth: 1560),
                               child: SizedBox(
                                 width: double.infinity,
                                 child: AnimatedSwitcher(
@@ -1690,8 +1694,8 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Monta o painel principal com o estado atual.
   Widget _dashboard(double width) {
-    final isDesktop = width >= 1080;
-    final isTablet = width >= 720 && width < 1080;
+    final isDesktop = width >= 1180;
+    final isTablet = width >= 720 && width < 1180;
 
     return Column(
       key: const ValueKey('dashboard'),
@@ -1716,7 +1720,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Coluna 1: Saldo, Moedas & Minhas Carteiras
+              // Coluna 1: Saldo, Moedas & Detalhes
               Expanded(
                 flex: 4,
                 child: Column(
@@ -1726,16 +1730,14 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                     const SizedBox(height: 18),
                     _assetsOverview(),
                     const SizedBox(height: 18),
-                    _walletsPanel(),
-                    const SizedBox(height: 18),
-                    _securityPanel(),
+                    _detailsPanel(),
                   ],
                 ),
               ),
               const SizedBox(width: 20),
-              // Coluna 2: Serviços, Guardar Dinheiro & Endereços
+              // Coluna 2: Serviços, Lembretes & Guardar Dinheiro
               Expanded(
-                flex: 5,
+                flex: 4,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -1743,18 +1745,22 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                     _modernServicesGrid(),
                     const SizedBox(height: 18),
                     _vaultsSummaryPanel(),
-                    const SizedBox(height: 18),
-                    _detailsPanel(),
                   ],
                 ),
               ),
               const SizedBox(width: 20),
-              // Coluna 3: Últimas Movimentações
+              // Coluna 3: Minhas Carteiras, Movimentações & Segurança
               Expanded(
                 flex: 4,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [_recentPanel()],
+                  children: [
+                    _walletsPanel(),
+                    const SizedBox(height: 18),
+                    _recentPanel(),
+                    const SizedBox(height: 18),
+                    _securityPanel(),
+                  ],
                 ),
               ),
             ],
@@ -1776,8 +1782,6 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                     _modernServicesGrid(),
                     const SizedBox(height: 16),
                     _vaultsSummaryPanel(),
-                    const SizedBox(height: 16),
-                    _detailsPanel(),
                   ],
                 ),
               ),
@@ -1790,6 +1794,8 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                     _walletsPanel(),
                     const SizedBox(height: 16),
                     _recentPanel(),
+                    const SizedBox(height: 16),
+                    _detailsPanel(),
                     const SizedBox(height: 16),
                     _securityPanel(),
                   ],
@@ -1914,27 +1920,27 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
   }) {
     return Material(
       color: isActive
-          ? _colors.primaryContainer.withValues(alpha: 0.35)
-          : _colors.surfaceContainerHighest.withValues(alpha: 0.25),
-      borderRadius: BorderRadius.circular(14),
+          ? _colors.primary.withValues(alpha: 0.14)
+          : _colors.surfaceContainerHighest.withValues(alpha: 0.3),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isActive
-                  ? _colors.primary.withValues(alpha: 0.5)
-                  : _colors.outlineVariant.withValues(alpha: 0.25),
+                  ? _colors.primary.withValues(alpha: 0.6)
+                  : _colors.outlineVariant.withValues(alpha: 0.35),
               width: isActive ? 1.5 : 1.0,
             ),
           ),
           child: Row(
             children: [
-              AssetMark(symbol, size: 30),
-              const SizedBox(width: 10),
+              AssetMark(symbol, size: 32),
+              const SizedBox(width: 11),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1946,6 +1952,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13.5,
+                            letterSpacing: -0.2,
                           ),
                         ),
                         if (isActive) ...[
@@ -1953,10 +1960,10 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,
-                              vertical: 1.5,
+                              vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: _colors.primary.withValues(alpha: 0.18),
+                              color: _colors.primary.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -2060,7 +2067,9 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
           LayoutBuilder(
             builder: (context, constraints) {
               final isVeryNarrow = constraints.maxWidth < 340;
-              final crossAxisCount = isVeryNarrow ? 1 : 2;
+              final crossAxisCount = isVeryNarrow
+                  ? 1
+                  : (constraints.maxWidth > 560 ? 3 : 2);
               const spacing = 8.0;
               final width =
                   (constraints.maxWidth - spacing * (crossAxisCount - 1)) /
@@ -2086,32 +2095,36 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   Widget _serviceCard(_ServiceItem item) {
     return Material(
-      color: item.color.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(14),
+      color: item.color.withValues(alpha: 0.07),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: _busy ? null : item.onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: item.color.withValues(alpha: 0.22),
+              color: item.color.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
           child: Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color: item.color.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: item.color.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
                 ),
                 child: Icon(item.icon, color: item.color, size: 20),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 11),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2124,6 +2137,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
+                        letterSpacing: -0.2,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -2132,7 +2146,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 11.5,
                         color: _colors.onSurfaceVariant,
                       ),
                     ),
@@ -2444,70 +2458,83 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
   Widget _walletRow(int index, String fiatValue) {
     final account = _accounts[index];
     final selected = index == _selected;
-    final radius = BorderRadius.circular(14);
+    final radius = BorderRadius.circular(16);
     final isMulti = account.isMultiCoin;
 
     return Material(
-      color: selected ? _colors.secondaryContainer : _colors.surface,
+      color: selected
+          ? _colors.primary.withValues(alpha: 0.12)
+          : _colors.surfaceContainerHighest.withValues(alpha: 0.25),
       borderRadius: radius,
-      child: ListTile(
-        selected: selected,
-        selectedColor: _colors.onSurface,
-        shape: RoundedRectangleBorder(borderRadius: radius),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-        leading: isMulti
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const AssetMark('BTC', size: 22),
-                  Transform.translate(
-                    offset: const Offset(-6, 0),
-                    child: const AssetMark('ETH', size: 22),
-                  ),
-                ],
-              )
-            : AssetMark(account.symbol),
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(
-                account.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w700),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          border: Border.all(
+            color: selected
+                ? _colors.primary.withValues(alpha: 0.5)
+                : _colors.outlineVariant.withValues(alpha: 0.3),
+            width: selected ? 1.5 : 1.0,
+          ),
+        ),
+        child: ListTile(
+          selected: selected,
+          selectedColor: _colors.onSurface,
+          shape: RoundedRectangleBorder(borderRadius: radius),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+          leading: isMulti
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const AssetMark('BTC', size: 24),
+                    Transform.translate(
+                      offset: const Offset(-6, 0),
+                      child: const AssetMark('ETH', size: 24),
+                    ),
+                  ],
+                )
+              : AssetMark(account.symbol, size: 36),
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  account.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              account.username,
-              style: TextStyle(
-                color: _colors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+              const SizedBox(width: 6),
+              Text(
+                account.username,
+                style: TextStyle(
+                  color: _colors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          subtitle: Text(
+            '${isMulti ? 'Multi-Moeda · ETH & BTC (${account.bitcoinChain?.label ?? 'Testnet4'})' : '${account.symbol} · ${account.bitcoinChain == BitcoinChain.testnet4
+                      ? 'Testnet4'
+                      : account.bitcoinChain == BitcoinChain.mainnet
+                      ? 'Rede principal'
+                      : 'Ethereum'}'}\n$fiatValue',
+            style: TextStyle(color: _colors.onSurfaceVariant, fontSize: 13),
+          ),
+          isThreeLine: true,
+          trailing: Icon(
+            selected ? Icons.check_circle : Icons.chevron_right,
+            color: selected ? _colors.primary : _colors.onSurfaceVariant,
+            size: 19,
+          ),
+          onTap: _busy || selected
+              ? null
+              : () => setState(() {
+                  _controller.select(index);
+                  _refreshBalance();
+                }),
         ),
-        subtitle: Text(
-          '${isMulti ? 'Multi-Moeda · ETH & BTC (${account.bitcoinChain?.label ?? 'Testnet4'})' : '${account.symbol} · ${account.bitcoinChain == BitcoinChain.testnet4
-                    ? 'Testnet4'
-                    : account.bitcoinChain == BitcoinChain.mainnet
-                    ? 'Rede principal'
-                    : 'Ethereum'}'}\n$fiatValue',
-          style: TextStyle(color: _colors.onSurfaceVariant, fontSize: 13),
-        ),
-        isThreeLine: true,
-        trailing: Icon(
-          selected ? Icons.check_circle : Icons.chevron_right,
-          color: selected ? _colors.primary : _colors.onSurfaceVariant,
-          size: 19,
-        ),
-        onTap: _busy || selected
-            ? null
-            : () => setState(() {
-                _controller.select(index);
-                _refreshBalance();
-              }),
       ),
     );
   }
@@ -2748,39 +2775,52 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
   );
 
   /// Monta a linha do endereço e suas ações de cópia.
-  Widget _addressItem(String label, String address) => Row(
-    children: [
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: _colors.onSurfaceVariant,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+  Widget _addressItem(String label, String address) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    decoration: BoxDecoration(
+      color: _colors.surfaceContainerHighest.withValues(alpha: 0.35),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(
+        color: _colors.outlineVariant.withValues(alpha: 0.4),
+        width: 1,
+      ),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: _colors.onSurfaceVariant,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            SelectableText(
-              address,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 12,
-                height: 1.4,
+              const SizedBox(height: 4),
+              SelectableText(
+                address,
+                style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 12.5,
+                  height: 1.35,
+                  letterSpacing: 0.2,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      IconButton(
-        tooltip: 'Copiar $label',
-        color: _colors.primary,
-        onPressed: () => _copy(address, label),
-        icon: const Icon(Icons.copy_outlined, size: 18),
-      ),
-    ],
+        const SizedBox(width: 8),
+        IconButton(
+          tooltip: 'Copiar $label',
+          color: _colors.primary,
+          onPressed: () => _copy(address, label),
+          icon: const Icon(Icons.copy_outlined, size: 18),
+        ),
+      ],
+    ),
   );
 
   /// Monta o painel de segurança com o estado atual.

@@ -725,9 +725,12 @@ class _WalletSettingsPageState extends State<WalletSettingsScreen> {
       body: ValueListenableBuilder<WalletPreferences>(
         valueListenable: widget.preferences,
         builder: (context, values, _) => SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.only(bottom: 40),
-            children: [
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8).copyWith(bottom: 40),
+                children: [
               // ==========================================
               // SEÇÃO DEDICADA: GERENCIAMENTO DA CONTA & PERFIL
               // ==========================================
@@ -1137,6 +1140,8 @@ class _WalletSettingsPageState extends State<WalletSettingsScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }

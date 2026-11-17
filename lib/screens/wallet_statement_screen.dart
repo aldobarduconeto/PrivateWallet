@@ -359,36 +359,66 @@ class _WalletStatementScreenState extends State<WalletStatementScreen> {
   /// Monta o indicador de estado.
   Widget _buildStatusChip(ChainMovement item) {
     if (item.failed) {
-      return const Chip(
-        backgroundColor: Color(0x22ff5252),
-        label: Text(
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0x22ff5252),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Text(
           'Falhou',
-          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Color(0xfff87171),
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
         ),
       );
     }
     if (!item.confirmed) {
-      return Chip(
-        backgroundColor: const Color(0x22ff9800),
-        avatar: const SizedBox(
-          width: 12,
-          height: 12,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: Colors.orange,
-          ),
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0x22ff9800),
+          borderRadius: BorderRadius.circular(8),
         ),
-        label: const Text(
-          'Pendente',
-          style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 10,
+              height: 10,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xfffbbf24),
+              ),
+            ),
+            SizedBox(width: 6),
+            Text(
+              'Pendente',
+              style: TextStyle(
+                color: Color(0xfffbbf24),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
       );
     }
-    return const Chip(
-      backgroundColor: Color(0x224caf50),
-      label: Text(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0x224caf50),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Text(
         'Confirmada',
-        style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: Color(0xff34d399),
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
       ),
     );
   }

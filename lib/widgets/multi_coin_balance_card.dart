@@ -440,9 +440,9 @@ class _MainActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = isPrimary
-        ? const Color(0xffe4e0ff)
-        : Colors.white.withValues(alpha: 0.14);
-    final fg = isPrimary ? walletInk : Colors.white;
+        ? const Color(0xff6366f1)
+        : Colors.white.withValues(alpha: 0.11);
+    const fg = Colors.white;
 
     return Material(
       color: Colors.transparent,
@@ -450,16 +450,25 @@ class _MainActionButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 4),
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(14),
-            border: isPrimary
-                ? null
-                : Border.all(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    width: 1,
-                  ),
+            border: Border.all(
+              color: isPrimary
+                  ? const Color(0xff818cf8).withValues(alpha: 0.6)
+                  : Colors.white.withValues(alpha: 0.15),
+              width: 1,
+            ),
+            boxShadow: isPrimary
+                ? [
+                    BoxShadow(
+                      color: const Color(0xff6366f1).withValues(alpha: 0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : null,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -470,7 +479,7 @@ class _MainActionButton extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: fg,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

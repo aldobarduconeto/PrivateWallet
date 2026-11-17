@@ -883,139 +883,181 @@ class _WalletContactsScreenState extends State<WalletContactsScreen> {
               .toList();
           return Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    sliver: SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Card de Destaque para Meu QR Code
-                          Card(
-                            elevation: 0,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withValues(alpha: 0.28),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              side: BorderSide(
-                                color: Theme.of(context).colorScheme.primary
-                                    .withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: InkWell(
-                              onTap: _showMyContactQr,
-                              borderRadius: BorderRadius.circular(14),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12,
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth >= 960
+                      ? 3
+                      : (constraints.maxWidth >= 640 ? 2 : 1);
+
+                  return CustomScrollView(
+                    slivers: [
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(
+                          constraints.maxWidth < 400 ? 12 : 16,
+                          8,
+                          constraints.maxWidth < 400 ? 12 : 16,
+                          8,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Card de Destaque para Meu QR Code
+                              Card(
+                                elevation: 0,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer
+                                    .withValues(alpha: 0.28),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  side: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withValues(alpha: 0.3),
+                                  ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.qr_code_2,
-                                      size: 28,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary,
+                                child: InkWell(
+                                  onTap: _showMyContactQr,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 12,
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Mostrar Meu QR Code de Amigo',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                            ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.qr_code_2,
+                                          size: 28,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'Mostrar Meu QR Code de Amigo',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Permita que amigos escaneiem seu cartão de contato',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          Text(
-                                            'Permita que amigos escaneiem seu cartão de contato',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                        const Icon(Icons.chevron_right, size: 20),
+                                      ],
                                     ),
-                                    const Icon(Icons.chevron_right, size: 20),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          SearchBar(
-                            controller: _search,
-                            hintText: l10n.searchContactsHint,
-                            leading: const Icon(Icons.search),
-                            elevation: const WidgetStatePropertyAll(0),
-                            padding: const WidgetStatePropertyAll(
-                              EdgeInsets.symmetric(horizontal: 14),
-                            ),
-                            trailing: [
-                              if (_search.text.isNotEmpty)
-                                IconButton(
-                                  tooltip: 'Limpar busca',
-                                  onPressed: _search.clear,
-                                  icon: const Icon(Icons.close),
+                              const SizedBox(height: 12),
+                              SearchBar(
+                                controller: _search,
+                                hintText: l10n.searchContactsHint,
+                                leading: const Icon(Icons.search),
+                                elevation: const WidgetStatePropertyAll(0),
+                                padding: const WidgetStatePropertyAll(
+                                  EdgeInsets.symmetric(horizontal: 14),
                                 ),
+                                trailing: [
+                                  if (_search.text.isNotEmpty)
+                                    IconButton(
+                                      tooltip: 'Limpar busca',
+                                      onPressed: _search.clear,
+                                      icon: const Icon(Icons.close),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              SegmentedButton<_Filter>(
+                                showSelectedIcon: false,
+                                segments: [
+                                  for (final filter in _Filter.values)
+                                    ButtonSegment(
+                                      value: filter,
+                                      label: Text(filter.label),
+                                    ),
+                                ],
+                                selected: {_filter},
+                                onSelectionChanged: (value) =>
+                                    setState(() => _filter = value.single),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          SegmentedButton<_Filter>(
-                            showSelectedIcon: false,
-                            segments: [
-                              for (final filter in _Filter.values)
-                                ButtonSegment(
-                                  value: filter,
-                                  label: Text(filter.label),
-                                ),
-                            ],
-                            selected: {_filter},
-                            onSelectionChanged: (value) =>
-                                setState(() => _filter = value.single),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (visible.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: EmptyState(
-                          icon: Icons.contacts_outlined,
-                          title: all.isEmpty
-                              ? l10n.noContactsSaved
-                              : 'Nenhum contato encontrado',
-                          message: all.isEmpty
-                              ? 'Adicione amigos pelo QR Code da carteira ou ID soberano para evitar transferências erradas e golpes.'
-                              : 'Ajuste a busca ou o filtro de rede.',
                         ),
                       ),
-                    )
-                  else
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
-                      sliver: SliverList.separated(
-                        itemCount: visible.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) =>
-                            _contactTile(visible[index]),
-                      ),
-                    ),
-                ],
+                      if (visible.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Center(
+                            child: EmptyState(
+                              icon: Icons.contacts_outlined,
+                              title: all.isEmpty
+                                  ? l10n.noContactsSaved
+                                  : 'Nenhum contato encontrado',
+                              message: all.isEmpty
+                                  ? 'Adicione amigos pelo QR Code da carteira ou ID soberano para evitar transferências erradas e golpes.'
+                                  : 'Ajuste a busca ou o filtro de rede.',
+                            ),
+                          ),
+                        )
+                      else if (crossAxisCount > 1)
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            constraints.maxWidth < 400 ? 12 : 16,
+                            4,
+                            constraints.maxWidth < 400 ? 12 : 16,
+                            96,
+                          ),
+                          sliver: SliverGrid(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 12,
+                              mainAxisExtent: 125,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => _contactTile(visible[index]),
+                              childCount: visible.length,
+                            ),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            constraints.maxWidth < 400 ? 12 : 16,
+                            4,
+                            constraints.maxWidth < 400 ? 12 : 16,
+                            96,
+                          ),
+                          sliver: SliverList.separated(
+                            itemCount: visible.length,
+                            separatorBuilder: (_, _) => const SizedBox(height: 8),
+                            itemBuilder: (context, index) =>
+                                _contactTile(visible[index]),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
           );

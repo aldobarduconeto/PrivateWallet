@@ -105,9 +105,12 @@ class _PrivacyStealthScreenState extends State<PrivacyStealthScreen> {
       appBar: AppBar(title: const Text('Central de Privacidade & Camuflagem')),
       body: _loading || audit == null
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  children: [
                 // Card de Pontuação de Privacidade
                 Container(
                   padding: const EdgeInsets.all(18),
@@ -335,6 +338,8 @@ class _PrivacyStealthScreenState extends State<PrivacyStealthScreen> {
                 ),
               ],
             ),
+          ),
+        ),
     );
   }
 }

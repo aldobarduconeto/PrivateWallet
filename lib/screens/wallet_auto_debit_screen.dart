@@ -341,24 +341,63 @@ class _WalletAutoDebitScreenState extends State<WalletAutoDebitScreen> {
                 ),
             ];
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: header.length + plans.length + 1,
-              itemBuilder: (context, index) {
-                if (index < header.length) return header[index];
-                final planIndex = index - header.length;
-                if (planIndex == plans.length) {
-                  return const SizedBox(height: 80);
-                }
-                final plan = plans[planIndex];
-                return _AutoDebitCard(
+            final planCards = [
+              for (final plan in plans)
+                _AutoDebitCard(
                   plan: plan,
                   isBusy: _busy,
                   onToggle: () => _togglePlan(plan),
                   onExecuteNow: () => _executeNow(plan),
                   onDelete: () => _deletePlan(plan),
-                );
-              },
+                ),
+            ];
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1100),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isWide = constraints.maxWidth >= 780;
+
+                    return ListView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: constraints.maxWidth < 400 ? 12 : 16,
+                        vertical: 16,
+                      ),
+                      children: [
+                        ...header,
+                        if (plans.isNotEmpty)
+                          if (isWide)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      for (var i = 0; i < planCards.length; i += 2)
+                                        planCards[i],
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      for (var i = 1; i < planCards.length; i += 2)
+                                        planCards[i],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            ...planCards,
+                        const SizedBox(height: 80),
+                      ],
+                    );
+                  },
+                ),
+              ),
             );
           },
         ),

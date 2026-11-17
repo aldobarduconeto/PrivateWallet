@@ -81,7 +81,7 @@ bool FlutterWindow::OnCreate() {
       return;
     }
     if (method == "close") {
-      PostMessage(hwnd, WM_CLOSE, 0, 0);
+      DestroyWindow(hwnd);
       result->Success();
       return;
     }
@@ -147,6 +147,11 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (message == WM_CLOSE) {
+    DestroyWindow(hwnd);
+    return 0;
+  }
+
   switch (message) {
     case WM_NCCALCSIZE: {
       if (wparam == TRUE) {

@@ -231,104 +231,139 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-                children: [
-                  // Cabeçalho de Cotações
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Cotações em Tempo Real',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 900;
+                final quotesSection = Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Cotações em Tempo Real',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Moeda: $_currency',
-                        style: TextStyle(
-                          color: colors.onSurfaceVariant,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Lista de Criptoativos
-                  for (final asset in _assets) _buildAssetCard(asset),
-
-                  const SizedBox(height: 24),
-                  const Divider(),
-                  const SizedBox(height: 12),
-
-                  // Seção de Alertas de Preço
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Alertas de Preço',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '${_alerts.where((a) => a.isActive).length} ativos',
-                        style: TextStyle(
-                          color: colors.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  if (_alerts.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerHighest.withValues(
-                          alpha: 0.4,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: colors.outlineVariant.withValues(alpha: 0.4),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.notifications_none,
-                            size: 40,
+                        Text(
+                          'Moeda: $_currency',
+                          style: TextStyle(
                             color: colors.onSurfaceVariant,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Nenhum alerta de preço configurado.',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    for (final asset in _assets) _buildAssetCard(asset),
+                  ],
+                );
+
+                final alertsSection = Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Alertas de Preço',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Crie alertas para ser avisado quando uma criptomoeda atingir o valor desejado.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
+                        ),
+                        Text(
+                          '${_alerts.where((a) => a.isActive).length} ativos',
+                          style: TextStyle(
+                            color: colors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    if (_alerts.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainerHighest.withValues(
+                            alpha: 0.4,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: colors.outlineVariant.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.notifications_none,
+                              size: 40,
                               color: colors.onSurfaceVariant,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Nenhum alerta de preço configurado.',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Crie alertas para ser avisado quando uma criptomoeda atingir o valor desejado.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      for (final alert in _alerts) _buildAlertTile(alert),
+                  ],
+                );
+
+                return RefreshIndicator(
+                  onRefresh: _loadData,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.fromLTRB(
+                          constraints.maxWidth < 400 ? 12 : 20,
+                          16,
+                          constraints.maxWidth < 400 ? 12 : 20,
+                          80,
+                        ),
+                        child: isWide
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(flex: 6, child: quotesSection),
+                                  const SizedBox(width: 24),
+                                  Expanded(flex: 5, child: alertsSection),
+                                ],
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  quotesSection,
+                                  const SizedBox(height: 24),
+                                  const Divider(),
+                                  const SizedBox(height: 16),
+                                  alertsSection,
+                                ],
+                              ),
                       ),
-                    )
-                  else
-                    for (final alert in _alerts) _buildAlertTile(alert),
-                ],
-              ),
+                    ),
+                  ),
+                );
+              },
             ),
     );
   }
@@ -336,6 +371,7 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
   /// Monta `asset card` no fluxo de mercado.
   Widget _buildAssetCard(MarketAsset asset) {
     final colors = Theme.of(context).colorScheme;
+    final dark = colors.brightness == Brightness.dark;
     final isBrl = _currency == 'BRL';
     final priceStr = isBrl
         ? 'R\$ ${asset.priceBrl.toStringAsFixed(asset.priceBrl < 10 ? 3 : 2)}'
@@ -347,11 +383,24 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
         ? 'R\$ ${asset.low24hBrl.toStringAsFixed(asset.low24hBrl < 10 ? 2 : 0)}'
         : '\$ ${(asset.low24hBrl / 5.56).toStringAsFixed(0)}';
 
+    final changeColor = asset.isPositive
+        ? (dark ? const Color(0xff34d399) : const Color(0xff059669))
+        : (dark ? const Color(0xfff87171) : const Color(0xffdc2626));
+    final changeBg = asset.isPositive
+        ? (dark ? const Color(0x2834d399) : const Color(0xffdcfce7))
+        : (dark ? const Color(0x28f87171) : const Color(0xfffee2e2));
+
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colors.outlineVariant.withValues(alpha: 0.35),
+          width: 1,
+        ),
+      ),
       elevation: 0,
-      color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+      color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -359,7 +408,7 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: asset.color.withValues(alpha: 0.15),
+                  backgroundColor: asset.color.withValues(alpha: 0.16),
                   child: Icon(asset.icon, color: asset.color, size: 24),
                 ),
                 const SizedBox(width: 12),
@@ -372,6 +421,7 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
+                          letterSpacing: -0.2,
                         ),
                       ),
                       Text(
@@ -390,29 +440,27 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
                     Text(
                       priceStr,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                         fontSize: 16,
+                        letterSpacing: -0.3,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
+                        horizontal: 7,
+                        vertical: 2.5,
                       ),
                       decoration: BoxDecoration(
-                        color: (asset.isPositive ? Colors.green : Colors.red)
-                            .withValues(alpha: 0.15),
+                        color: changeBg,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         '${asset.isPositive ? "+" : ""}${asset.change24h.toStringAsFixed(2)}%',
                         style: TextStyle(
-                          color: asset.isPositive
-                              ? Colors.green.shade700
-                              : Colors.red.shade700,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          color: changeColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11.5,
                         ),
                       ),
                     ),

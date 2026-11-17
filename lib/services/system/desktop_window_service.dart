@@ -74,6 +74,10 @@ class DesktopWindowService {
     try {
       await _channel.invokeMethod('close');
     } on Object catch (_) {}
+    try {
+      await SystemNavigator.pop();
+    } on Object catch (_) {}
+    exit(0);
   }
 
   /// Inicia o arrasto nativo da janela através do cursor.
