@@ -444,7 +444,6 @@ class _HeaderActionIcon extends StatelessWidget {
   final Color? color;
 
   const _HeaderActionIcon({
-    super.key,
     required this.icon,
     required this.tooltip,
     required this.onTap,

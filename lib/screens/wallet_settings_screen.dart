@@ -586,9 +586,6 @@ class _WalletSettingsPageState extends State<WalletSettingsScreen> {
     );
   }
 
-  /// Gerencia `desktop password` no fluxo de configurações (alias mantido para retrocompatibilidade).
-  Future<void> _manageDesktopPassword() => _manageMasterPassword();
-
   /// Abre `account management` no fluxo de configurações.
   void _openAccountManagement() {
     if (widget.walletAccount == null || widget.walletController == null) {

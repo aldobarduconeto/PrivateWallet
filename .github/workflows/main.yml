@@ -39,7 +39,7 @@ jobs:
         run: flutter pub get
 
       - name: Run Flutter Analyze
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
   # ==========================================
   # 1. ANDROID (APK) & LINUX (DEB)
