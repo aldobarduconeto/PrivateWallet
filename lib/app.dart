@@ -104,10 +104,16 @@ class _PrivateWalletAppState extends State<PrivateWalletApp> {
             final content = child ?? const SizedBox.shrink();
             return Material(
               color: Theme.of(context).scaffoldBackgroundColor,
-              child: Column(
-                children: [
-                  const DesktopTitleBar(),
-                  Expanded(child: content),
+              child: Overlay(
+                initialEntries: [
+                  OverlayEntry(
+                    builder: (context) => Column(
+                      children: [
+                        const DesktopTitleBar(),
+                        Expanded(child: content),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             );

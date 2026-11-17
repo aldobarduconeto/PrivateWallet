@@ -1287,8 +1287,8 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
   Widget _header() {
     final isDesktop = DesktopWindowService.isDesktop;
     // No desktop, a DesktopTitleBar já atua como cabeçalho superior unificado.
-    // Quando não há contas cadastradas, evitamos duplicar a barra de título/logo no corpo.
-    if (isDesktop && _accounts.isEmpty) {
+    // Evita duplicidade de duas linhas de cabeçalho na aplicação.
+    if (isDesktop) {
       return const SizedBox.shrink();
     }
 

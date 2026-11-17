@@ -81,22 +81,14 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
         bottom: false,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final showFullSearchBar = constraints.maxWidth >= 840;
-            final isCompact = constraints.maxWidth < 620;
-            final isVeryCompact = constraints.maxWidth < 460;
+            final showFullSearchBar = constraints.maxWidth >= 880;
+            final isCompact = constraints.maxWidth < 640;
+            final isVeryCompact = constraints.maxWidth < 480;
             final barHeight = isDesktop ? widget.height : 42.0;
 
             return Container(
               height: barHeight,
-              decoration: BoxDecoration(
-                color: bgColor,
-                border: Border(
-                  bottom: BorderSide(
-                    color: borderColor,
-                    width: 1.0,
-                  ),
-                ),
-              ),
+              color: bgColor,
               child: Row(
                 children: [
                   // Lado Esquerdo: Marca, Logo e Badge de Rede
@@ -132,8 +124,9 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                           ValueListenableBuilder<String>(
                             valueListenable: cmd.networkLabelNotifier,
                             builder: (context, label, _) {
-                              final isTestnet = label.toLowerCase().contains('sepolia') ||
-                                  label.toLowerCase().contains('testnet');
+                              final cleanLabel = label.contains('·') ? label.split('·').first.trim() : label;
+                              final isTestnet = cleanLabel.toLowerCase().contains('sepolia') ||
+                                  cleanLabel.toLowerCase().contains('testnet');
                               final badgeColor = isTestnet ? Colors.amber : Colors.greenAccent.shade400;
 
                               return Container(
@@ -158,7 +151,8 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                                     ConstrainedBox(
                                       constraints: const BoxConstraints(maxWidth: 130),
                                       child: Text(
-                                        label,
+                                        cleanLabel,
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 9.5,
@@ -177,36 +171,38 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                     ),
                   ),
 
-                  // Área central: Busca rápida responsiva e arrasto
+                  // Área central: Busca rápida responsiva centralizada e arrasto nativo
                   Expanded(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onPanStart: isDesktop ? (_) => DesktopWindowService.startDragging() : null,
-                      onDoubleTap: isDesktop ? _handleToggleMaximize : null,
-                      child: const SizedBox(height: double.infinity),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onPanStart: isDesktop ? (_) => DesktopWindowService.startDragging() : null,
+                            onDoubleTap: isDesktop ? _handleToggleMaximize : null,
+                            child: const SizedBox(height: double.infinity),
+                          ),
+                        ),
+                        if (showFullSearchBar)
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 320),
+                            child: _HeaderSearchBar(
+                              height: 27.0,
+                              shortcutHint: shortcutHint,
+                              onTap: () => HeaderQuickSearchDialog.show(context),
+                            ),
+                          ),
+                        Expanded(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onPanStart: isDesktop ? (_) => DesktopWindowService.startDragging() : null,
+                            onDoubleTap: isDesktop ? _handleToggleMaximize : null,
+                            child: const SizedBox(height: double.infinity),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-
-                  if (showFullSearchBar) ...[
-                    Flexible(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 320),
-                        child: _HeaderSearchBar(
-                          height: 27.0,
-                          shortcutHint: shortcutHint,
-                          onTap: () => HeaderQuickSearchDialog.show(context),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onPanStart: isDesktop ? (_) => DesktopWindowService.startDragging() : null,
-                        onDoubleTap: isDesktop ? _handleToggleMaximize : null,
-                        child: const SizedBox(height: double.infinity),
-                      ),
-                    ),
-                  ],
 
                   // Lado Direito: Ações rápidas integradas
                   Row(
@@ -226,7 +222,7 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                           builder: (context, info, _) {
                             final gwei = info?.ethNormalGwei ?? 24;
                             return Tooltip(
-                              message: 'Taxa de Gas estimada na rede (${gwei} Gwei).\nToque para abrir o Radar de Gas.',
+                              message: 'Taxa de Gas estimada na rede ($gwei Gwei).\nToque para abrir o Radar de Gas.',
                               child: InkWell(
                                 onTap: () => cmd.onOpenGasTracker?.call(),
                                 borderRadius: BorderRadius.circular(6),
@@ -245,6 +241,8 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                                       const SizedBox(width: 3.5),
                                       Text(
                                         '$gwei Gwei',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700,
@@ -297,13 +295,7 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
 
                       // Controles de Janela Minimalistas (Exibidos apenas em Desktop: Windows, Linux, macOS)
                       if (isDesktop) ...[
-                        const SizedBox(width: 3),
-                        Container(
-                          width: 1,
-                          height: 16,
-                          color: borderColor,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                        ),
+                        const SizedBox(width: 6),
                         _WindowButton(
                           tooltip: 'Minimizar',
                           hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.08),
