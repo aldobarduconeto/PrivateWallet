@@ -542,7 +542,7 @@ class _CryptoPosScreenState extends State<CryptoPosScreen> {
             ),
           );
         },
-      ),,
+      ),
     );
   }
 }
