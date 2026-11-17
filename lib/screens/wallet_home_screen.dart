@@ -27,6 +27,7 @@ import '../services/gas_tracker_service.dart';
 import '../services/system/auth_protection_service.dart';
 import '../services/system/background_sync_service.dart';
 import '../services/system/clipboard_guard_service.dart';
+import '../services/system/desktop_window_service.dart';
 import '../services/system/header_command_service.dart';
 import '../services/system/security_shield_service.dart';
 import '../services/wallet_sync_service.dart';
