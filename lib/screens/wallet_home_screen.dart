@@ -1264,7 +1264,9 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                               child: SizedBox(
                                 width: double.infinity,
                                 child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 250),
+                                  duration: MediaQuery.disableAnimationsOf(context)
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 250),
                                   child: _accounts.isEmpty
                                       ? _welcome()
                                       : _dashboard(viewport.maxWidth),
