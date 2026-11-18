@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../models/financial_goal.dart';
+import 'startup_storage.dart';
 
 class GoalsStore {
   static const _storage = FlutterSecureStorage();
@@ -10,7 +11,7 @@ class GoalsStore {
 
   /// Lê os dados persistidos e prepara o estado em memória.
   Future<List<FinancialGoal>> load() async {
-    final raw = await _storage.read(key: _key);
+    final raw = await _storage.readForStartup(_key);
     if (raw == null) return [];
     final list = <FinancialGoal>[];
     for (final item in jsonDecode(raw) as List<dynamic>) {

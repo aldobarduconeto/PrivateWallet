@@ -244,8 +244,11 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     };
     cmd.isBalanceHidden = () => _hideBalance;
     cmd.getActiveAccount = () => _accounts.isEmpty ? null : _account;
-    cmd.networkLabelNotifier.value = _networkLabel;
-    cmd.hideBalanceNotifier.value = _hideBalance;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      cmd.networkLabelNotifier.value = _networkLabel;
+      cmd.hideBalanceNotifier.value = _hideBalance;
+    });
     cmd.startGasMonitoring();
 
     WidgetsBinding.instance.addObserver(this);
@@ -308,12 +311,14 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     try {
       await _controller.load();
       // A agenda, metas, cofres, orçamento e débitos são opcionais: falhas neles não bloqueiam as carteiras.
-      await _contacts.load().catchError((Object _) {});
-      await _goals.load().catchError((Object _) {});
-      await _vaults.load().catchError((Object _) {});
-      await _budget.load().catchError((Object _) {});
-      await _autoDebits.load().catchError((Object _) {});
-      await _groupPurchases.load().catchError((Object _) {});
+      await Future.wait([
+        _contacts.load().catchError((Object _) {}),
+        _goals.load().catchError((Object _) {}),
+        _vaults.load().catchError((Object _) {}),
+        _budget.load().catchError((Object _) {}),
+        _autoDebits.load().catchError((Object _) {}),
+        _groupPurchases.load().catchError((Object _) {}),
+      ]);
       if (!mounted) return;
       setState(() {
         _loading = false;

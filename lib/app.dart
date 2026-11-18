@@ -25,6 +25,7 @@ class PrivateWalletApp extends StatefulWidget {
 class _PrivateWalletAppState extends State<PrivateWalletApp> {
   final _preferences = PreferencesController();
   bool _loadingPreferences = true;
+  bool _preferencesLoadFailed = false;
 
   /// Prepara o estado e inicia o carregamento necessário ao montar o widget.
   @override
@@ -35,8 +36,13 @@ class _PrivateWalletAppState extends State<PrivateWalletApp> {
 
   /// Carrega as preferências antes de liberar a tela inicial.
   Future<void> _loadPreferences() async {
-    await _preferences.load();
-    if (mounted) setState(() => _loadingPreferences = false);
+    try {
+      await _preferences.load();
+    } catch (_) {
+      if (mounted) _preferencesLoadFailed = true;
+    } finally {
+      if (mounted) setState(() => _loadingPreferences = false);
+    }
   }
 
   /// Libera os recursos mantidos pela instância.
@@ -104,22 +110,40 @@ class _PrivateWalletAppState extends State<PrivateWalletApp> {
             final content = child ?? const SizedBox.shrink();
             return Material(
               color: Theme.of(context).scaffoldBackgroundColor,
-              child: Overlay(
-                initialEntries: [
-                  OverlayEntry(
-                    builder: (context) => Column(
-                      children: [
-                        const DesktopTitleBar(),
-                        Expanded(child: content),
-                      ],
-                    ),
-                  ),
-                ],
+              child: Overlay.wrap(
+                child: Column(
+                  children: [
+                    const DesktopTitleBar(),
+                    Expanded(child: content),
+                  ],
+                ),
               ),
             );
           },
           home: _loadingPreferences
               ? const Scaffold(body: Center(child: CircularProgressIndicator()))
+              : _preferencesLoadFailed
+              ? Scaffold(
+                  body: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Não foi possível carregar as preferências.'),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: () {
+                            setState(() {
+                              _loadingPreferences = true;
+                              _preferencesLoadFailed = false;
+                            });
+                            _loadPreferences();
+                          },
+                          child: const Text('Tentar novamente'),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               : WalletHome(
                   preferences: _preferences,
                   savePreferences: _preferences.save,

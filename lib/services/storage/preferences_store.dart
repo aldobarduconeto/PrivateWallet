@@ -8,6 +8,7 @@ import '../../models/app_contrast_theme.dart';
 import '../../models/fiat_currency.dart';
 import '../../models/networks.dart';
 import '../../models/wallet_preferences.dart';
+import 'startup_storage.dart';
 
 class WalletPreferencesStore {
   /// Inicializa [WalletPreferencesStore] com os dados recebidos.
@@ -19,9 +20,9 @@ class WalletPreferencesStore {
 
   /// Lê os dados persistidos e prepara o estado em memória.
   Future<WalletPreferences> load() async {
-    final stored = await _storage.read(key: _key);
+    final stored = await _storage.readForStartup(_key);
     if (stored == null) {
-      final theme = await _storage.read(key: _legacyTheme);
+      final theme = await _storage.readForStartup(_legacyTheme);
       return WalletPreferences(theme: _themeFrom(theme));
     }
     final json = jsonDecode(stored);

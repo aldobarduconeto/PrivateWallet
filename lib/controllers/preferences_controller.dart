@@ -13,12 +13,8 @@ class PreferencesController extends ValueNotifier<WalletPreferences> {
 
   /// Lê os dados persistidos e prepara o estado em memória.
   Future<void> load() async {
-    try {
-      final preferences = await _store.load();
-      if (!_disposed) value = preferences;
-    } on Exception {
-      // Defaults are available even when preferences cannot be read.
-    }
+    final preferences = await _store.load();
+    if (!_disposed) value = preferences;
   }
 
   /// Persiste os dados para uso nas próximas sessões.

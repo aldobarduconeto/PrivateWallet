@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../models/group_purchase.dart';
+import 'startup_storage.dart';
 
 class GroupPurchaseStore {
   static const _storage = FlutterSecureStorage();
@@ -10,7 +11,7 @@ class GroupPurchaseStore {
 
   /// Lê os dados persistidos e prepara o estado em memória.
   Future<List<GroupPurchase>> load() async {
-    final raw = await _storage.read(key: _key);
+    final raw = await _storage.readForStartup(_key);
     if (raw == null) return [];
     final items = <GroupPurchase>[];
     for (final row in jsonDecode(raw) as List<dynamic>) {

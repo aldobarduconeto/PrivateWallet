@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../models/spending_budget.dart';
+import 'startup_storage.dart';
 
 class BudgetStore {
   static const _storage = FlutterSecureStorage();
@@ -10,7 +11,7 @@ class BudgetStore {
 
   /// Lê os dados persistidos e prepara o estado em memória.
   Future<Map<String, SpendingBudget>> load() async {
-    final raw = await _storage.read(key: _key);
+    final raw = await _storage.readForStartup(_key);
     if (raw == null || raw.isEmpty) return {};
     try {
       final decoded = jsonDecode(raw);

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../models/auto_debit_plan.dart';
+import 'startup_storage.dart';
 
 class AutoDebitStore {
   /// Inicializa [AutoDebitStore] com os dados recebidos.
@@ -13,7 +14,7 @@ class AutoDebitStore {
 
   /// Lê os dados persistidos e prepara o estado em memória.
   Future<List<AutoDebitPlan>> load() async {
-    final raw = await _storage.read(key: _key);
+    final raw = await _storage.readForStartup(_key);
     if (raw == null || raw.isEmpty) return [];
     try {
       final decoded = jsonDecode(raw);
