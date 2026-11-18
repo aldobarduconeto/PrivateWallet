@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../services/wallet_sync_service.dart';
+import 'wallet_layout.dart';
 
 /// Indica a condição `hasMobileScanner` usada em qr reader.
 bool get hasMobileScanner =>
@@ -66,7 +67,7 @@ class _WalletScannerState extends State<_WalletScanner> {
 
   /// Monta a interface a partir do estado atual e do tema do contexto.
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => WalletScaffold(
     appBar: AppBar(title: Text(widget.title)),
     body: MobileScanner(
       controller: _controller,

@@ -9,6 +9,7 @@ import 'services/system/desktop_window_service.dart';
 import 'theme/wallet_theme.dart';
 import 'widgets/desktop_title_bar.dart';
 import 'widgets/header_quick_search_dialog.dart';
+import 'widgets/wallet_layout.dart';
 
 class PrivateWalletApp extends StatefulWidget {
   /// Inicializa [PrivateWalletApp] com os dados recebidos.
@@ -121,9 +122,9 @@ class _PrivateWalletAppState extends State<PrivateWalletApp> {
             );
           },
           home: _loadingPreferences
-              ? const Scaffold(body: Center(child: CircularProgressIndicator()))
+              ? const WalletScaffold(body: Center(child: CircularProgressIndicator()))
               : _preferencesLoadFailed
-              ? Scaffold(
+              ? WalletScaffold(
                   body: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

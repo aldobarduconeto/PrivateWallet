@@ -52,6 +52,7 @@ import 'wallet_settings_screen.dart';
 import 'wallet_statement_screen.dart';
 import 'wallet_sync_screen.dart';
 import 'welcome_onboarding_screen.dart';
+import '../widgets/wallet_layout.dart';
 
 enum AccountMode {
   create('Criar carteira', Icons.add_circle_outline),
@@ -1235,7 +1236,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
         onUnlocked: () => setState(() => _isLocked = false),
       );
     }
-    return Scaffold(
+    return WalletScaffold(
       body: Column(
         children: [
           _header(),
@@ -1308,12 +1309,13 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                 constraints: const BoxConstraints(maxWidth: 1440),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: 24,
+                    horizontal: MediaQuery.sizeOf(context).width < 400 ? 12 : 24,
                     vertical: isDesktop ? 6 : 12,
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final isWideDesktop = constraints.maxWidth >= 840;
+                      final width = walletLayoutWidth(context, constraints.maxWidth);
+                      final isWideDesktop = width >= 1000;
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1330,19 +1332,22 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  'Private Wallet',
-                                  style: TextStyle(
-                                    fontSize: isWideDesktop ? 19 : 17,
-                                    fontWeight: FontWeight.w800,
+                                Expanded(
+                                  child: Text(
+                                    'Private Wallet',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: isWideDesktop ? 19 : 17,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
-                                if (_accounts.isNotEmpty && !_loading) ...[
+                                if (width >= 500 && _accounts.isNotEmpty && !_loading) ...[
                                   const SizedBox(width: 8),
                                   _networkBadge(),
                                 ],
                               ],
-                              const Spacer(),
                             if (isWideDesktop &&
                                 !_loading &&
                                 !_loadFailed &&
@@ -1379,7 +1384,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                               const SizedBox(width: 4),
                             ] else if (!isWideDesktop && !_loading && !_loadFailed) ...[
                               // Monitor Rápido de Gas no topo do Mobile
-                              ValueListenableBuilder<GasFeeInfo?>(
+                              if (width >= 430) ValueListenableBuilder<GasFeeInfo?>(
                                 valueListenable: HeaderCommandService.instance.gasInfoNotifier,
                                 builder: (context, info, _) {
                                   final gwei = info?.ethNormalGwei ?? 24;
@@ -1694,7 +1699,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
       ),
     );
     return LayoutBuilder(
-      builder: (context, constraints) => constraints.maxWidth >= 760
+      builder: (context, constraints) => walletLayoutWidth(context, constraints.maxWidth) >= 760
           ? Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1712,8 +1717,9 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
 
   /// Monta o painel principal com o estado atual.
   Widget _dashboard(double width) {
-    final isDesktop = width >= 1180;
-    final isTablet = width >= 720 && width < 1180;
+    final layoutWidth = walletLayoutWidth(context, width);
+    final isDesktop = layoutWidth >= 1180;
+    final isTablet = layoutWidth >= 720 && !isDesktop;
 
     return Column(
       key: const ValueKey('dashboard'),
@@ -1963,7 +1969,10 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           name,
@@ -1973,8 +1982,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                             letterSpacing: -0.2,
                           ),
                         ),
-                        if (isActive) ...[
-                          const SizedBox(width: 6),
+                        if (isActive)
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,
@@ -1993,7 +2001,6 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                               ),
                             ),
                           ),
-                        ],
                       ],
                     ),
                     const SizedBox(height: 3),
@@ -2218,8 +2225,8 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
       children: [
         WalletSectionTitle(
           'Últimas Movimentações',
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
+          trailing: Wrap(
+            alignment: WrapAlignment.end,
             children: [
               TextButton.icon(
                 onPressed: _busy ? null : _openStatement,
@@ -2511,17 +2518,17 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
                   ],
                 )
               : AssetMark(account.symbol, size: 36),
-          title: Row(
+          title: Wrap(
+            spacing: 6,
+            runSpacing: 2,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Flexible(
-                child: Text(
-                  account.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
+              Text(
+                account.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w700),
               ),
-              const SizedBox(width: 6),
               Text(
                 account.username,
                 style: TextStyle(

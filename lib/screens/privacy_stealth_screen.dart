@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/wallet_account.dart';
 import '../services/system/privacy_stealth_service.dart';
+import '../widgets/wallet_layout.dart';
 
 class PrivacyStealthScreen extends StatefulWidget {
   /// Inicializa [PrivacyStealthScreen] com os dados recebidos.
@@ -101,7 +102,7 @@ class _PrivacyStealthScreenState extends State<PrivacyStealthScreen> {
     final colors = Theme.of(context).colorScheme;
     final audit = _audit;
 
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(title: const Text('Central de Privacidade & Camuflagem')),
       body: _loading || audit == null
           ? const Center(child: CircularProgressIndicator())

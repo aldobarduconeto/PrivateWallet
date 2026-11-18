@@ -7,6 +7,7 @@ import '../models/group_purchase.dart';
 import '../models/wallet_account.dart';
 import '../models/wallet_contact.dart';
 import '../widgets/wallet_widgets.dart';
+import '../widgets/wallet_layout.dart';
 
 /// Tela de Gestão de Compras Conjuntas (Racha Coletivo Soberano).
 class GroupPurchasesScreen extends StatefulWidget {
@@ -380,7 +381,8 @@ class _GroupPurchasesScreenState extends State<GroupPurchasesScreen> {
   /// Monta a interface a partir do estado atual e do tema do contexto.
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WalletScaffold(
+      maxContentWidth: 1000,
       appBar: AppBar(
         title: const Text('Compras Conjuntas'),
         actions: [
@@ -391,17 +393,17 @@ class _GroupPurchasesScreenState extends State<GroupPurchasesScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: WalletFloatingActionButton(
         onPressed: _busy ? null : () => _newPurchase(),
         icon: const Icon(Icons.add),
-        label: const Text('Nova Compra Conjunta'),
+        label: 'Nova Compra Conjunta',
       ),
       body: ValueListenableBuilder<List<GroupPurchase>>(
         valueListenable: _ctrl,
         builder: (context, purchases, _) {
           if (purchases.isEmpty) {
             return Center(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: EmptyState(
                   icon: Icons.group_work_outlined,

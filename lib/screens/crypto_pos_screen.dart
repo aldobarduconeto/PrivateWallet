@@ -6,6 +6,7 @@ import '../models/fiat_currency.dart';
 import '../models/wallet_account.dart';
 import '../services/crypto_finance_service.dart';
 import '../services/fiat_exchange_service.dart';
+import '../widgets/wallet_layout.dart';
 
 class CryptoPosScreen extends StatefulWidget {
   /// Inicializa [CryptoPosScreen] com os dados recebidos.
@@ -215,11 +216,11 @@ class _CryptoPosScreenState extends State<CryptoPosScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(title: const Text('Cobrança Rápida & PDV')),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 840;
+          final isWide = walletLayoutWidth(context, constraints.maxWidth) >= 840;
 
           final formInputs = Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -330,51 +331,44 @@ class _CryptoPosScreenState extends State<CryptoPosScreen> {
               ],
 
               // Valor da cobrança e seleção de moeda base
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              WalletCardColumns(
+                twoColumnWidth: 420,
                 children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Valor da Cobrança',
-                        prefixText: '$_currency ',
-                        border: const OutlineInputBorder(),
-                      ),
-                      onChanged: (_) => _calculateCrypto(),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
                     ),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Valor da Cobrança',
+                      prefixText: '$_currency ',
+                      border: const OutlineInputBorder(),
+                    ),
+                    onChanged: (_) => _calculateCrypto(),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: InkWell(
-                      onTap: _chooseCurrencyDialog,
-                      borderRadius: BorderRadius.circular(4),
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: 'Moeda Base',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: const Icon(Icons.arrow_drop_down),
-                          helperText:
-                              _currency == (widget.baseCurrency?.code ?? 'BRL')
-                                  ? 'Padrão (Config)'
-                                  : 'Personalizada',
-                          helperMaxLines: 1,
-                        ),
-                        child: Text(
-                          _currency,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                  InkWell(
+                    onTap: _chooseCurrencyDialog,
+                    borderRadius: BorderRadius.circular(4),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Moeda Base',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: const Icon(Icons.arrow_drop_down),
+                        helperText:
+                            _currency == (widget.baseCurrency?.code ?? 'BRL')
+                                ? 'Padrão (Config)'
+                                : 'Personalizada',
+                        helperMaxLines: 1,
+                      ),
+                      child: Text(
+                        _currency,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
                     ),

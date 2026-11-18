@@ -9,6 +9,7 @@ import '../models/wallet_account.dart';
 import '../services/system/device_info_service.dart';
 import '../services/wallet_sync_service.dart';
 import '../widgets/qr_reader.dart';
+import '../widgets/wallet_layout.dart';
 
 class WalletExportDialog extends StatefulWidget {
   /// Inicializa [WalletExportDialog] com os dados recebidos.
@@ -754,7 +755,7 @@ class _WalletImportPageState extends State<WalletImportPage> {
         _deviceInfo?.platform.toLowerCase().contains('android') == true ||
         _deviceInfo?.platform.toLowerCase().contains('ios') == true;
 
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(
         title: Text(_isMirror ? 'Espelhar Contas' : 'Importar Carteira'),
       ),

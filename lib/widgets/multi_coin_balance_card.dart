@@ -105,24 +105,25 @@ class MultiCoinBalanceCard extends StatelessWidget {
                 AssetMark(account.symbol, size: 36),
               const SizedBox(width: 10),
               Expanded(
+                flex: 3,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Flexible(
-                          child: Text(
-                            account.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        Text(
+                          account.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(width: 6),
                         UsernameBadge(
                           account.username,
                           color: Colors.lightGreenAccent,
@@ -143,7 +144,15 @@ class MultiCoinBalanceCard extends StatelessWidget {
                   ],
                 ),
               ),
-              networkBadge,
+              const SizedBox(width: 8),
+              Flexible(
+                flex: 2,
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  widthFactor: 1,
+                  child: networkBadge,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -192,7 +201,9 @@ class MultiCoinBalanceCard extends StatelessWidget {
           ],
 
           // Valor em foco
-          Row(
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
             children: [
               Text(
                 isMulti
@@ -204,7 +215,6 @@ class MultiCoinBalanceCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: 6),
               InkWell(
                 onTap: onToggleHideBalance,
                 borderRadius: BorderRadius.circular(20),

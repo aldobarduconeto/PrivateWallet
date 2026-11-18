@@ -14,6 +14,7 @@ import '../services/fiat_exchange_service.dart';
 import '../services/system/auth_protection_service.dart';
 import 'wallet_account_screen.dart';
 import 'welcome_onboarding_screen.dart';
+import '../widgets/wallet_layout.dart';
 
 enum SettingsAction {
   create,
@@ -717,7 +718,7 @@ class _WalletSettingsPageState extends State<WalletSettingsScreen> {
     final colors = Theme.of(context).colorScheme;
     final account = widget.walletAccount;
 
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(title: Text(context.l10n.settingsTitle)),
       body: ValueListenableBuilder<WalletPreferences>(
         valueListenable: widget.preferences,

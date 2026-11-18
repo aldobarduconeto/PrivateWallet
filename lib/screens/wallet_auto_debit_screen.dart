@@ -12,6 +12,7 @@ import '../models/wallet_account.dart';
 import '../services/crypto_finance_service.dart';
 import '../theme/wallet_theme.dart';
 import '../widgets/wallet_widgets.dart';
+import '../widgets/wallet_layout.dart';
 
 class WalletAutoDebitScreen extends StatefulWidget {
   /// Inicializa [WalletAutoDebitScreen] com os dados recebidos.
@@ -174,7 +175,7 @@ class _WalletAutoDebitScreenState extends State<WalletAutoDebitScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(
         title: const Text('Débito Automático'),
         actions: [
@@ -185,10 +186,10 @@ class _WalletAutoDebitScreenState extends State<WalletAutoDebitScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: WalletFloatingActionButton(
         onPressed: _openCreateDialog,
         icon: const Icon(Icons.add_card),
-        label: const Text('Novo Débito Automático'),
+        label: 'Novo Débito Automático',
       ),
       body: SafeArea(
         child: ValueListenableBuilder<List<AutoDebitPlan>>(
@@ -203,10 +204,13 @@ class _WalletAutoDebitScreenState extends State<WalletAutoDebitScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 6,
                       children: [
                         const NetworkBadge('CONTROLE TOTAL', isTest: false),
-                        const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -225,12 +229,14 @@ class _WalletAutoDebitScreenState extends State<WalletAutoDebitScreen> {
                                 color: Colors.lightGreenAccent,
                               ),
                               const SizedBox(width: 6),
-                              Text(
-                                '$activeCount ativo${activeCount == 1 ? '' : 's'}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                              Flexible(
+                                child: Text(
+                                  '$activeCount ativo${activeCount == 1 ? '' : 's'}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -357,7 +363,7 @@ class _WalletAutoDebitScreenState extends State<WalletAutoDebitScreen> {
                 constraints: const BoxConstraints(maxWidth: 1100),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final isWide = constraints.maxWidth >= 780;
+                    final isWide = walletLayoutWidth(context, constraints.maxWidth) >= 780;
 
                     return ListView(
                       padding: EdgeInsets.symmetric(

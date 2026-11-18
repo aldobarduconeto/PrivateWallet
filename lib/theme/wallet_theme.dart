@@ -242,6 +242,8 @@ ThemeData walletTheme(
     dialogTheme: DialogThemeData(
       backgroundColor: scheme.surface,
       surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      constraints: const BoxConstraints(minWidth: 280, maxWidth: 560),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(WalletRadius.large),
       ),
@@ -249,6 +251,7 @@ ThemeData walletTheme(
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: scheme.surface,
       surfaceTintColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: 640),
       showDragHandle: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(

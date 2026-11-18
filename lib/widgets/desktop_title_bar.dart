@@ -7,6 +7,7 @@ import '../services/gas_tracker_service.dart';
 import '../services/system/desktop_window_service.dart';
 import '../services/system/header_command_service.dart';
 import 'header_quick_search_dialog.dart';
+import 'wallet_layout.dart';
 
 /// Barra de título limpa, moderna e integrada com recursos de produtividade e segurança:
 /// - Barra de pesquisa rápida / Command Palette (Spotlight Ctrl+K)
@@ -79,10 +80,14 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
         bottom: false,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final showFullSearchBar = constraints.maxWidth >= 880;
-            final isCompact = constraints.maxWidth < 640;
-            final isVeryCompact = constraints.maxWidth < 480;
-            final barHeight = isDesktop ? widget.height : 42.0;
+            final width = walletLayoutWidth(context, constraints.maxWidth);
+            final showFullSearchBar = width >= 880;
+            final isCompact = width < 640;
+            final isVeryCompact = width < 480;
+            final showNetworkBadge = width >= 400;
+            final labelHeight = MediaQuery.textScalerOf(context).scale(14) + 22;
+            final barHeight = (isDesktop ? widget.height : 48.0)
+                .clamp(labelHeight, double.infinity);
 
             return Container(
               height: barHeight,
@@ -117,9 +122,9 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
                               color: foregroundColor,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          if (showNetworkBadge) const SizedBox(width: 8),
                           // Badge de Rede Conectada
-                          ValueListenableBuilder<String>(
+                          if (showNetworkBadge) ValueListenableBuilder<String>(
                             valueListenable: cmd.networkLabelNotifier,
                             builder: (context, label, _) {
                               final cleanLabel = label.contains('·') ? label.split('·').first.trim() : label;

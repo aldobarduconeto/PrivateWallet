@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/market_asset.dart';
 import '../services/crypto_market_service.dart';
+import '../widgets/wallet_layout.dart';
 
 class CryptoMarketScreen extends StatefulWidget {
   /// Inicializa [CryptoMarketScreen] com os dados recebidos.
@@ -202,7 +203,7 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(
         title: const Text('Mercado & Alertas'),
         actions: [
@@ -224,21 +225,24 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: WalletFloatingActionButton(
         onPressed: () => _openCreateAlertDialog(),
         icon: const Icon(Icons.add_alert),
-        label: const Text('Novo Alerta'),
+        label: 'Novo Alerta',
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : LayoutBuilder(
               builder: (context, constraints) {
-                final isWide = constraints.maxWidth >= 900;
+                final isWide = walletLayoutWidth(context, constraints.maxWidth) >= 900;
                 final quotesSection = Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         const Text(
                           'Cotações em Tempo Real',
@@ -265,8 +269,11 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
                 final alertsSection = Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         const Text(
                           'Alertas de Preço',
@@ -434,43 +441,48 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      priceStr,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 2.5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: changeBg,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        '${asset.isPositive ? "+" : ""}${asset.change24h.toStringAsFixed(2)}%',
-                        style: TextStyle(
-                          color: changeColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11.5,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        priceStr,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          letterSpacing: -0.3,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 3),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: changeBg,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '${asset.isPositive ? "+" : ""}${asset.change24h.toStringAsFixed(2)}%',
+                          style: TextStyle(
+                            color: changeColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 Text(
                   '24h Mín: $lowStr  |  Máx: $highStr',

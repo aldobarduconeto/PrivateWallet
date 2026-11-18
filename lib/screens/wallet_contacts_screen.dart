@@ -13,6 +13,7 @@ import '../widgets/qr_reader.dart';
 import '../widgets/wallet_form.dart';
 import '../widgets/wallet_widgets.dart';
 import 'group_purchases_screen.dart';
+import '../widgets/wallet_layout.dart';
 
 /// Agenda de destinatários frequentes e amigos do Private Wallet.
 class WalletContactsScreen extends StatefulWidget {
@@ -820,7 +821,7 @@ class _WalletContactsScreenState extends State<WalletContactsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(
         title: Text(l10n.contactsTitle),
         actions: [
@@ -859,10 +860,10 @@ class _WalletContactsScreenState extends State<WalletContactsScreen> {
               )
             : null,
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: WalletFloatingActionButton(
         onPressed: _busy ? null : _addChoice,
         icon: const Icon(Icons.person_add_alt_1_outlined),
-        label: Text(l10n.newContact),
+        label: l10n.newContact,
       ),
       body: ValueListenableBuilder<List<WalletContact>>(
         valueListenable: _contacts,
@@ -886,9 +887,9 @@ class _WalletContactsScreenState extends State<WalletContactsScreen> {
               constraints: const BoxConstraints(maxWidth: 1200),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final crossAxisCount = constraints.maxWidth >= 960
+                  final crossAxisCount = walletLayoutWidth(context, constraints.maxWidth) >= 960
                       ? 3
-                      : (constraints.maxWidth >= 640 ? 2 : 1);
+                      : (walletLayoutWidth(context, constraints.maxWidth) >= 640 ? 2 : 1);
 
                   return CustomScrollView(
                     slivers: [

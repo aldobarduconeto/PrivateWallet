@@ -18,7 +18,10 @@ class WalletPanel extends StatelessWidget {
         width: 1.0,
       ),
     ),
-    child: Padding(padding: const EdgeInsets.all(20), child: child),
+    child: Padding(
+      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 400 ? 12 : 20),
+      child: child,
+    ),
   );
 }
 
@@ -90,7 +93,10 @@ class WalletSectionTitle extends StatelessWidget {
           ),
         ),
       ),
-      ?trailing,
+      if (trailing case final action?) ...[
+        const SizedBox(width: 8),
+        Flexible(child: action),
+      ],
     ],
   );
 }

@@ -5,6 +5,7 @@ import '../controllers/wallet_controller.dart';
 import '../models/wallet_account.dart';
 import '../services/system/clipboard_guard_service.dart';
 import '../widgets/wallet_widgets.dart';
+import '../widgets/wallet_layout.dart';
 
 class WalletAccountScreen extends StatefulWidget {
   /// Inicializa [WalletAccountScreen] com os dados recebidos.
@@ -269,7 +270,7 @@ class _WalletAccountScreenState extends State<WalletAccountScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(title: const Text('Gerenciamento da Conta')),
       body: SafeArea(
         child: Center(
@@ -328,12 +329,14 @@ class _WalletAccountScreenState extends State<WalletAccountScreen> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      _account.username,
-                                      style: const TextStyle(
-                                        color: Colors.lightGreenAccent,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
+                                    Flexible(
+                                      child: Text(
+                                        _account.username,
+                                        style: const TextStyle(
+                                          color: Colors.lightGreenAccent,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 4),

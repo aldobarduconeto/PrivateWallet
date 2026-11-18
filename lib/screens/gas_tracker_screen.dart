@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/gas_tracker_service.dart';
+import '../widgets/wallet_layout.dart';
 
 class GasTrackerScreen extends StatefulWidget {
   /// Inicializa [GasTrackerScreen] com os dados recebidos.
@@ -76,7 +77,7 @@ class _GasTrackerScreenState extends State<GasTrackerScreen> {
     final colors = Theme.of(context).colorScheme;
     final info = _info;
 
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(
         title: const Text('Otimizador de Gas & Mempool'),
         actions: [
@@ -91,7 +92,7 @@ class _GasTrackerScreenState extends State<GasTrackerScreen> {
           ? const Center(child: CircularProgressIndicator())
           : LayoutBuilder(
               builder: (context, constraints) {
-                final isWide = constraints.maxWidth >= 760;
+                final isWide = walletLayoutWidth(context, constraints.maxWidth) >= 760;
 
                 final tierCards = _selectedChain == 'ETH'
                     ? [
@@ -212,15 +213,16 @@ class _GasTrackerScreenState extends State<GasTrackerScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              'Alarme ativo para <= $_savedTarget Gwei.',
-                              style: const TextStyle(
-                                color: Colors.green,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Text(
+                                'Alarme ativo para <= $_savedTarget Gwei.',
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                            const Spacer(),
                             TextButton(
                               onPressed: () {
                                 _targetGweiController.clear();
@@ -260,11 +262,13 @@ class _GasTrackerScreenState extends State<GasTrackerScreen> {
                             size: 20,
                           ),
                           SizedBox(width: 8),
-                          Text(
-                            'Dica de Economia Soberana',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                          Expanded(
+                            child: Text(
+                              'Dica de Economia Soberana',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ],
@@ -444,7 +448,10 @@ class _GasTrackerScreenState extends State<GasTrackerScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6,
+                  runSpacing: 4,
                   children: [
                     Text(
                       title,
@@ -453,8 +460,7 @@ class _GasTrackerScreenState extends State<GasTrackerScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    if (isRecommended) ...[
-                      const SizedBox(width: 6),
+                    if (isRecommended)
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 6,
@@ -473,7 +479,6 @@ class _GasTrackerScreenState extends State<GasTrackerScreen> {
                           ),
                         ),
                       ),
-                    ],
                   ],
                 ),
                 const SizedBox(height: 2),

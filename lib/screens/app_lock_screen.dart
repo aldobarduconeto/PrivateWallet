@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../services/system/auth_protection_service.dart';
 import '../theme/wallet_theme.dart';
+import '../widgets/wallet_layout.dart';
 
 class AppLockScreen extends StatefulWidget {
   /// Inicializa [AppLockScreen] com os dados recebidos.
@@ -148,7 +149,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
 
     return PopScope(
       canPop: false,
-      child: Scaffold(
+      child: WalletScaffold(
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),

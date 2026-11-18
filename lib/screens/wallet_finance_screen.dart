@@ -22,6 +22,7 @@ import '../widgets/wallet_widgets.dart';
 import 'group_purchases_screen.dart';
 import 'wallet_auto_debit_screen.dart';
 import 'crypto_market_screen.dart';
+import '../widgets/wallet_layout.dart';
 
 class WalletFinanceScreen extends StatefulWidget {
   /// Inicializa [WalletFinanceScreen] com os dados recebidos.
@@ -213,7 +214,7 @@ class _WalletFinanceScreenState extends State<WalletFinanceScreen> {
   /// Monta a interface a partir do estado atual e do tema do contexto.
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(
         title: const Text('Finanças Cripto · Gestão Patrimonial'),
         actions: [
@@ -228,19 +229,19 @@ class _WalletFinanceScreenState extends State<WalletFinanceScreen> {
         ],
       ),
       floatingActionButton: _tab == FinanceTab.goals
-          ? FloatingActionButton.extended(
+          ? WalletFloatingActionButton(
               onPressed: _addNewGoalDialog,
               icon: const Icon(Icons.add_task_rounded),
-              label: const Text('Nova meta'),
+              label: 'Nova meta',
             )
           : _tab == FinanceTab.vaults
-          ? FloatingActionButton.extended(
+          ? WalletFloatingActionButton(
               onPressed: _addNewVaultDialog,
               icon: const Icon(Icons.add_business_rounded),
-              label: const Text('Novo cofre'),
+              label: 'Novo cofre',
             )
           : _tab == FinanceTab.autoDebit
-          ? FloatingActionButton.extended(
+          ? WalletFloatingActionButton(
               onPressed: () => Navigator.push<void>(
                 context,
                 MaterialPageRoute(
@@ -252,10 +253,10 @@ class _WalletFinanceScreenState extends State<WalletFinanceScreen> {
                 ),
               ),
               icon: const Icon(Icons.add_card),
-              label: const Text('Gerenciar débitos'),
+              label: 'Gerenciar débitos',
             )
           : _tab == FinanceTab.groupPurchases
-          ? FloatingActionButton.extended(
+          ? WalletFloatingActionButton(
               onPressed: () => Navigator.push<void>(
                 context,
                 MaterialPageRoute(
@@ -267,12 +268,12 @@ class _WalletFinanceScreenState extends State<WalletFinanceScreen> {
                 ),
               ),
               icon: const Icon(Icons.group_work_outlined),
-              label: const Text('Nova compra conjunta'),
+              label: 'Nova compra conjunta',
             )
           : null,
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 900;
+          final isWide = walletLayoutWidth(context, constraints.maxWidth) >= 900;
           return Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1300),
@@ -1126,17 +1127,7 @@ class _WalletFinanceScreenState extends State<WalletFinanceScreen> {
             children: [
               overviewCard,
               const SizedBox(height: 16),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisExtent: 210,
-                ),
-                itemCount: vaultWidgets.length,
-                itemBuilder: (_, i) => vaultWidgets[i],
-              ),
+              WalletCardColumns(children: vaultWidgets),
             ],
           );
         }
@@ -1199,17 +1190,7 @@ class _WalletFinanceScreenState extends State<WalletFinanceScreen> {
         ];
 
         if (isWide) {
-          return GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisExtent: 180,
-            ),
-            itemCount: cards.length,
-            itemBuilder: (_, i) => cards[i],
-          );
+          return WalletCardColumns(children: cards);
         }
 
         return Column(

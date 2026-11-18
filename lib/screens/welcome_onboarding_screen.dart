@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/wallet_account.dart';
 import '../services/system/app_permissions_service.dart';
 import '../theme/wallet_theme.dart';
+import '../widgets/wallet_layout.dart';
 
 class WelcomeOnboardingScreen extends StatefulWidget {
   /// Inicializa [WelcomeOnboardingScreen] com os dados recebidos.
@@ -71,7 +72,7 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return WalletScaffold(
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -151,12 +152,14 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              const Text(
-                                'FUNCIONALIDADES DA SUA CARTEIRA',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.1,
+                              const Expanded(
+                                child: Text(
+                                  'FUNCIONALIDADES DA SUA CARTEIRA',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.1,
+                                  ),
                                 ),
                               ),
                             ],
@@ -204,8 +207,10 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                   const SizedBox(height: 28),
 
                   // Seção de Permissões do Sistema
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

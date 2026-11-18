@@ -7,6 +7,7 @@ import '../models/wallet_activity.dart';
 import '../services/blockchain/blockchain_service.dart';
 import '../theme/wallet_theme.dart';
 import '../widgets/wallet_widgets.dart';
+import '../widgets/wallet_layout.dart';
 
 class WalletActivityScreen extends StatefulWidget {
   /// Inicializa [WalletActivityScreen] com os dados recebidos.
@@ -199,7 +200,7 @@ class _WalletActivityScreenState extends State<WalletActivityScreen> {
     for (final entry in visible) {
       groups.putIfAbsent(dayLabel(entry.created), () => []).add(entry);
     }
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(
         title: const Text('Histórico de envios'),
         actions: [

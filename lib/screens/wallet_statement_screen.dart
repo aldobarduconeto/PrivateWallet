@@ -15,6 +15,7 @@ import '../theme/wallet_theme.dart';
 import '../widgets/crypto_receipt_dialog.dart';
 import '../widgets/wallet_form.dart';
 import '../widgets/wallet_widgets.dart';
+import '../widgets/wallet_layout.dart';
 
 class WalletStatementScreen extends StatefulWidget {
   /// Inicializa [WalletStatementScreen] com os dados recebidos.
@@ -559,7 +560,7 @@ class _WalletStatementScreenState extends State<WalletStatementScreen> {
   /// Monta a interface a partir do estado atual e do tema do contexto.
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WalletScaffold(
       appBar: AppBar(
         title: const Text('Extrato'),
         actions: [
@@ -720,17 +721,18 @@ class _WalletStatementScreenState extends State<WalletStatementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 6,
             children: [
-              Flexible(
-                child: Text(
-                  'Resumo · ${_statement.period?.label ?? "Todo o período"}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
+              Text(
+                'Resumo · ${_statement.period?.label ?? "Todo o período"}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
               ),
               NetworkBadge(
@@ -743,24 +745,20 @@ class _WalletStatementScreenState extends State<WalletStatementScreen> {
             ],
           ),
           const SizedBox(height: 18),
-          Row(
+          WalletCardColumns(
+            twoColumnWidth: 420,
             children: [
-              Expanded(
-                child: _summaryStat(
-                  'Entradas',
-                  '+${format(s.incoming)} $symbol',
-                  const Color(0xff91efce),
-                  Icons.arrow_downward_rounded,
-                ),
+              _summaryStat(
+                'Entradas',
+                '+${format(s.incoming)} $symbol',
+                const Color(0xff91efce),
+                Icons.arrow_downward_rounded,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _summaryStat(
-                  'Saídas',
-                  '−${format(s.outgoing)} $symbol',
-                  const Color(0xffffbd76),
-                  Icons.arrow_upward_rounded,
-                ),
+              _summaryStat(
+                'Saídas',
+                '−${format(s.outgoing)} $symbol',
+                const Color(0xffffbd76),
+                Icons.arrow_upward_rounded,
               ),
             ],
           ),
@@ -791,12 +789,14 @@ class _WalletStatementScreenState extends State<WalletStatementScreen> {
             children: [
               Icon(icon, size: 16, color: color),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: walletHeroMuted,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: walletHeroMuted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
