@@ -35,7 +35,7 @@ Capturas reais simuladas em tema escuro, demonstrando a interface adaptativa par
    - [3.0 Design Moderno, Clean e Sem Nomes Técnicos](#30-design-moderno-clean-e-sem-nomes-técnicos)
    - [3.1 Gerenciamento de Carteiras e Contas](#31-gerenciamento-de-carteiras-e-contas)
    - [3.2 Saldos, Valuation Patrimonial e Moedas Fiduciárias](#32-saldos-valuation-patrimonial-e-moedas-fiduciárias)
-   - [3.3 Envio e Recebimento Soberano](#33-envio-e-recebimento-soberano)
+   - [3.3 Envio, Recebimento e Troca de Moedas (Swap BTC ⇄ ETH)](#33-envio-recebimento-e-troca-de-moedas-swap-btc--eth)
    - [3.4 Extrato On-Chain vs Histórico de Envios Locais](#34-extrato-on-chain-vs-histórico-de-envios-locais)
    - [3.5 Inspetor Anti-Golpe & Escudo Determinístico de Endereços](#35-inspetor-anti-golpe--escudo-determinístico-de-endereços)
    - [3.6 Otimizador de Gas & Rastreador de Mempool](#36-otimizador-de-gas--rastreador-de-mempool)
@@ -47,6 +47,10 @@ Capturas reais simuladas em tema escuro, demonstrando a interface adaptativa par
    - [3.12 Agenda Descentralizada de Contatos](#312-agenda-descentralizada-de-contatos)
    - [3.13 Sincronização P2P por QR Code & Backup Soberano](#313-sincronização-p2p-por-qr-code--backup-soberano)
    - [3.14 Segurança, Bloqueio Biométrico e Proteção de Sistema](#314-segurança-bloqueio-biométrico-e-proteção-de-sistema)
+   - [3.15 Experiência Desktop Sem Moldura Nativa (Windows, Linux e macOS)](#315-experiência-desktop-sem-moldura-nativa-windows-linux-e-macos)
+   - [3.16 Experiência Mobile: Barra de Pesquisa Rápida e Segurança no Topo (Android e iOS)](#316-experiência-mobile-barra-de-pesquisa-rápida-e-segurança-no-topo-android-e-ios)
+   - [3.17 Suporte Multichain Descomplicado & Central de Gastos (Spending Hub)](#317-suporte-multichain-descomplicado--central-de-gastos-spending-hub)
+   - [3.18 Frases Mnemônicas de Recuperação (BIP-39) & Confirmações Claras de Transação](#318-frases-mnemônicas-de-recuperação-bip-39--confirmações-claras-de-transação)
 4. [Arquitetura de Software](#arquitetura-de-software)
 5. [Configuração Técnica das Redes (--dart-define)](#configuração-técnica-das-redes---dart-define)
 6. [Diagnóstico, Validação e Troubleshooting](#diagnóstico-validação-e-troubleshooting)
@@ -180,12 +184,18 @@ O PrivateWallet permite criar e gerenciar múltiplos perfis de carteiras com dif
 
 ---
 
-### 3.3 Envio e Recebimento Soberano
+### 3.3 Envio, Recebimento e Troca de Moedas (Swap BTC ⇄ ETH)
 
 - **Receber Criptomoedas**: Gera o endereço público no formato textual e em QR Code de alta densidade. O usuário pode preencher um valor de referência para gerar um QR Code com pedido de pagamento padronizado:
   - **Bitcoin**: Padrão URI [BIP-21](https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki) (`bitcoin:<endereco>?amount=<valor>&message=<descricao>`).
   - **Ethereum**: Padrão URI [EIP-681](https://eips.ethereum.org/EIPS/eip-681) (`ethereum:<endereco>?value=<wei>&label=<descricao>`).
 - **Enviar Criptomoedas**: Permite digitar o endereço manualmente, colar da área de transferência ou escanear via câmera/arquivo de imagem. O fluxo calcula a taxa de rede recomendada com o gateway da blockchain correspondente, exibe o resumo completo na confirmação e realiza a assinatura criptográfica estritamente no dispositivo antes de transmitir a transação assinada (*broadcast*).
+- **Troca de Moedas (Swap BTC ⇄ ETH / Satoshis ⇄ Ether)** (`lib/screens/crypto_swap_screen.dart`):
+  - Permite a troca direta e bilateral entre **Bitcoin** (em Bitcoins decimais ou em **Satoshis**) e **Ethereum** (em Ether ou Wei).
+  - Suporta alternância dinâmica de unidade para Bitcoin (`[BTC]` ou `[Satoshis (sats)]`).
+  - Cotação em tempo real baseada em mercado descentralizado com cálculo de taxa de liquidez e proteção de slippage (tolerância máxima configurável).
+  - Em contas unificadas Multi-Moeda, os fundos de destino são creditados diretamente no endereço correspondente da mesma conta.
+  - Registro contábil completo no histórico de atividades locais e emissão de Comprovante Bancário Oficial de Troca.
 
 ---
 
@@ -363,6 +373,30 @@ Nos sistemas móveis (**Android** e **iOS**), a interface foi aprimorada com as 
   - **Purga de Clipboard (`🧹`)**: Limpa instantaneamente a memória da área de transferência do celular, evitando que outros aplicativos capturem chaves ou endereços copiados.
   - **Inspetor Anti-Golpe (`🛡️`)**: Abre o auditor de endereços on-chain para validação imediata de formato, rede, checksum e emojis anti-poisoning.
 - **Badge de Status de Rede**: Exibição da rede ativa (`● Sepolia` ou `● Mainnet`) diretamente no topo do painel.
+
+---
+
+### 3.17 Suporte Multichain Descomplicado & Central de Gastos (Spending Hub)
+
+- **Suporte Multichain sem Complexidade**: Acesso unificado a múltiplas criptomoedas em um único aplicativo, eliminando a necessidade de múltiplos apps ou configurações técnicas de RPC e Chain IDs. Suporte integrado a **Bitcoin (BTC/Satoshis)**, **Ethereum (ETH/Wei)**, **Tether USD (USDT)** e **Solana (SOL)** com consolidação patrimonial em tempo real.
+- **Central de Gastos Cripto no Dia a Dia (`lib/screens/crypto_spending_screen.dart`)**:
+  - **Vales-Presente & Gift Cards**: Compre vouchers das principais marcas (iFood, Uber, Mercado Livre, Spotify, Netflix, Steam, Airbnb) com débito direto em Bitcoin ou Ethereum.
+  - **Pagamento de Boletos Bancários**: Pague contas de consumo (luz, água, internet, condomínio) com conversão automática de cripto.
+  - **Recarga de Celular**: Recarregue operadoras (Vivo, Claro, TIM) debitando satoshis ou wei instantaneamente.
+
+---
+
+### 3.18 Frases Mnemônicas de Recuperação (BIP-39) & Confirmações Claras de Transação
+
+- **Frases de Recuperação Mnemônicas (BIP-39)** (`lib/services/bip39_service.dart` e `lib/widgets/recovery_phrase_dialog.dart`):
+  - Suporte completo a frases de **12 e 24 palavras** com vocabulário oficial de 2048 palavras padronizadas.
+  - Derivação determinística das chaves privadas para Ethereum e Bitcoin a partir da semente mnemônica.
+  - Importação de carteiras tanto por chave privada hexadecimal quanto por frases de 12 ou 24 palavras.
+  - Backup visual com grade numerada, proteção contra *shoulder surfing* (revelar/ocultar) e **teste interativo de verificação (Quiz)** para garantir que o usuário anotou suas palavras com segurança.
+- **Confirmações Claras de Transação (`lib/widgets/clear_transaction_confirmation_dialog.dart`)**:
+  - Modal de conferência visual completa antes de qualquer assinatura e transmissão on-chain:
+  - Exibição destacada de valores em cripto e fiduciário, identificadores de contato, emojis determinísticos anti-golpe, taxa de rede com estimativa de tempo e checagem preventiva contra *Address Poisoning*.
+  - Confirmação explícita em dois passos para evitar envios acidentais.
 
 ---
 

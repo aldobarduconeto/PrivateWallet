@@ -1049,8 +1049,8 @@ class _WalletSettingsPageState extends State<WalletSettingsScreen> {
                     ),
                     if (widget.canSign)
                       _walletLink(
-                        Icons.lock_outline,
-                        'Chave de recuperação',
+                        Icons.key_rounded,
+                        'Frase de recuperação (BIP-39)',
                         SettingsAction.backup,
                       ),
                     _walletLink(

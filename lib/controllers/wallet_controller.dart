@@ -233,4 +233,13 @@ class WalletController {
 
   /// Monta o extrato com o estado atual.
   StatementController statement() => _wallet.statement(account, network);
+
+  /// Atualiza o saldo em cache do ativo indicado na carteira atual.
+  void setCachedBalanceForSymbol(String symbol, BigInt balance) {
+    _wallet.setCachedBalance(account, network, symbol, balance);
+  }
+
+  /// Registra uma atividade no histórico local (como uma troca de moedas).
+  Future<void> recordActivity(WalletActivity activity) =>
+      _wallet.recordActivity(activity);
 }

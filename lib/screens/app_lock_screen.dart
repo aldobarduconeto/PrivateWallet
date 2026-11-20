@@ -29,6 +29,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
   int _lockoutSeconds = 0;
   Timer? _lockoutTimer;
   bool _hasMasterPass = false;
+  bool _showPinKeypad = false;
 
   /// Prepara o estado e inicia o carregamento necessário ao montar o widget.
   @override
@@ -268,6 +269,20 @@ class _AppLockScreenState extends State<AppLockScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  Center(
+                    child: TextButton.icon(
+                      icon: Icon(_showPinKeypad ? Icons.keyboard : Icons.dialpad_rounded, size: 18),
+                      label: Text(_showPinKeypad ? 'Usar Teclado Alfanumérico' : 'Usar Teclado Numérico (PIN)'),
+                      onPressed: () => setState(() => _showPinKeypad = !_showPinKeypad),
+                    ),
+                  ),
+
+                  if (_showPinKeypad) ...[
+                    const SizedBox(height: 12),
+                    _buildPinKeypad(colors),
+                    const SizedBox(height: 12),
+                  ],
+
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
@@ -339,6 +354,103 @@ class _AppLockScreenState extends State<AppLockScreen> {
           ),
         ),
       ),
+    );
+  Widget _buildPinKeypad(ColorScheme colors) {
+    Widget pinBtn(String label, {IconData? icon, VoidCallback? onTap}) {
+      return Material(
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap ??
+              () {
+                if (_lockoutSeconds > 0) return;
+                setState(() {
+                  _passwordController.text += label;
+                });
+                if (_passwordController.text.length == 4 ||
+                    _passwordController.text.length == 6) {
+                  _unlockWithPassword();
+                }
+              },
+          child: Container(
+            height: 52,
+            alignment: Alignment.center,
+            child: icon != null
+                ? Icon(icon, size: 22, color: colors.onSurface)
+                : Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: pinBtn('1')),
+            const SizedBox(width: 10),
+            Expanded(child: pinBtn('2')),
+            const SizedBox(width: 10),
+            Expanded(child: pinBtn('3')),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(child: pinBtn('4')),
+            const SizedBox(width: 10),
+            Expanded(child: pinBtn('5')),
+            const SizedBox(width: 10),
+            Expanded(child: pinBtn('6')),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(child: pinBtn('7')),
+            const SizedBox(width: 10),
+            Expanded(child: pinBtn('8')),
+            const SizedBox(width: 10),
+            Expanded(child: pinBtn('9')),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: pinBtn(
+                '',
+                icon: Icons.backspace_outlined,
+                onTap: () {
+                  if (_passwordController.text.isNotEmpty) {
+                    setState(() {
+                      _passwordController.text = _passwordController.text
+                          .substring(0, _passwordController.text.length - 1);
+                    });
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: pinBtn('0')),
+            const SizedBox(width: 10),
+            Expanded(
+              child: pinBtn(
+                '',
+                icon: Icons.check_circle_outline,
+                onTap: _unlockWithPassword,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

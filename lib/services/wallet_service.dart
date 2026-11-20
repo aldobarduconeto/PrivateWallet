@@ -203,4 +203,28 @@ class WalletService {
       ),
     );
   }
+
+  /// Atualiza manualmente o saldo em cache de um ativo (útil após swaps ou ajustes).
+  void setCachedBalance(
+    WalletAccount account,
+    Network network,
+    String symbol,
+    BigInt newBalance,
+  ) {
+    final target = _targetFor(account, network, symbol);
+    final key = _balanceKey(target.netId, target.address);
+    _balances[key] = (
+      at: DateTime.now().add(const Duration(minutes: 30)),
+      pending: null,
+      resolved: newBalance,
+    );
+    _statements[key]?.refresh();
+  }
+
+  /// Registra uma atividade manualmente no histórico local (como uma troca de moedas).
+  Future<void> recordActivity(WalletActivity activity) async {
+    await _activity.record(activity);
+    final key = _balanceKey(activity.networkId, activity.sender);
+    _statements[key]?.refresh();
+  }
 }

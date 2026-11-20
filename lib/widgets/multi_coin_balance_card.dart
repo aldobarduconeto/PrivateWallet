@@ -25,6 +25,7 @@ class MultiCoinBalanceCard extends StatelessWidget {
     required this.onSelectAsset,
     required this.onSend,
     required this.onReceive,
+    this.onSwap,
     required this.onStatement,
     required this.onFinance,
     required this.onPurchases,
@@ -45,6 +46,7 @@ class MultiCoinBalanceCard extends StatelessWidget {
   final ValueChanged<String> onSelectAsset;
   final VoidCallback? onSend;
   final VoidCallback? onReceive;
+  final VoidCallback? onSwap;
   final VoidCallback? onStatement;
   final VoidCallback? onFinance;
   final VoidCallback? onPurchases;
@@ -332,6 +334,17 @@ class MultiCoinBalanceCard extends StatelessWidget {
                   onTap: onReceive,
                 ),
               ),
+              if (onSwap != null) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _MainActionButton(
+                    icon: Icons.currency_exchange_rounded,
+                    label: 'Trocar',
+                    isPrimary: false,
+                    onTap: onSwap,
+                  ),
+                ),
+              ],
               if (onPos != null) ...[
                 const SizedBox(width: 8),
                 Expanded(

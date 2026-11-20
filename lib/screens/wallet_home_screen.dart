@@ -37,10 +37,16 @@ import '../widgets/header_quick_search_dialog.dart';
 import '../widgets/multi_coin_balance_card.dart';
 import '../widgets/address_inspector_dialog.dart';
 import '../widgets/wallet_form.dart';
+import '../services/bip39_service.dart';
+import '../widgets/clear_transaction_confirmation_dialog.dart';
+import '../widgets/multichain_asset_manager_dialog.dart';
+import '../widgets/recovery_phrase_dialog.dart';
 import '../widgets/wallet_widgets.dart';
 import 'app_lock_screen.dart';
 import 'crypto_market_screen.dart';
 import 'crypto_pos_screen.dart';
+import 'crypto_spending_screen.dart';
+import 'crypto_swap_screen.dart';
 import 'gas_tracker_screen.dart';
 import 'privacy_stealth_screen.dart';
 import 'wallet_account_screen.dart';
@@ -56,7 +62,7 @@ import '../widgets/wallet_layout.dart';
 
 enum AccountMode {
   create('Criar carteira', Icons.add_circle_outline),
-  import('Importar chave privada', Icons.key_outlined),
+  import('Importar com chave ou frase', Icons.key_outlined),
   watch('Acompanhar endereço', Icons.visibility_outlined);
 
   /// Inicializa a configuração de painel.
@@ -210,6 +216,16 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
       if (_accounts.isEmpty) return;
       _receive();
     };
+    cmd.onOpenSwap = () {
+      if (_accounts.isEmpty) return;
+      _openSwap();
+    };
+    cmd.onOpenSpending = () {
+      if (_accounts.isEmpty) return;
+      _openSpendingHub();
+    };
+    cmd.onOpenMultichain = () => _openMultichainManager();
+    cmd.onOpenRecoveryPhrase = () => _backup();
     cmd.onOpenStatement = () {
       if (_accounts.isEmpty) return;
       _openStatement();
@@ -262,6 +278,10 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     final cmd = HeaderCommandService.instance;
     cmd.onOpenSend = null;
     cmd.onOpenReceive = null;
+    cmd.onOpenSwap = null;
+    cmd.onOpenSpending = null;
+    cmd.onOpenMultichain = null;
+    cmd.onOpenRecoveryPhrase = null;
     cmd.onOpenStatement = null;
     cmd.onOpenFinance = null;
     cmd.onOpenPos = null;
@@ -479,11 +499,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
           (label: 'Nome de usuário (@usuario)', secret: false, amount: false),
           if (mode == AccountMode.import)
             (
-              label: kind.isMulti
-                  ? 'Chave privada hexadecimal (64 caracteres)'
-                  : (bitcoin == null
-                        ? 'Chave privada hexadecimal'
-                        : 'Chave privada WIF comprimida'),
+              label: 'Chave privada ou Frase de Recuperação (12 ou 24 palavras)',
               secret: true,
               amount: false,
             ),
@@ -502,6 +518,15 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
             );
           }
           final username = WalletAccount.sanitizeUsername(usernameInput);
+          String parseSecretInput(String raw) {
+            final trimmed = raw.trim();
+            final words = trimmed.split(RegExp(r'\s+'));
+            if (words.length >= 12) {
+              return Bip39Service.mnemonicToPrivateKeyHex(trimmed);
+            }
+            return trimmed;
+          }
+
           if (kind.isMulti) {
             final btcChain = kind.bitcoin ?? BitcoinChain.testnet4;
             return switch (mode) {
@@ -512,7 +537,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
               ),
               AccountMode.import => WalletAccount.importMultiCoin(
                 name,
-                values[2],
+                parseSecretInput(values[2]),
                 username: username,
                 bitcoin: btcChain,
               ),
@@ -532,7 +557,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
             ),
             AccountMode.import => WalletAccount.import(
               name,
-              values[2],
+              parseSecretInput(values[2]),
               username: username,
               bitcoin: bitcoin,
             ),
@@ -569,12 +594,22 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
         },
       );
       if (isNewAccount) {
-        await Navigator.push<void>(
-          context,
-          MaterialPageRoute(
-            builder: (_) => WelcomeOnboardingScreen(accountName: account.name),
-          ),
-        );
+        if (account.secret != null && mounted) {
+          await RecoveryPhraseDialog.show(
+            context: context,
+            hexSecret: account.secret!,
+            accountName: account.name,
+            isNewWallet: true,
+          );
+        }
+        if (mounted) {
+          await Navigator.push<void>(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WelcomeOnboardingScreen(accountName: account.name),
+            ),
+          );
+        }
       }
     }
   }
@@ -731,45 +766,19 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
         knownAddresses: knownAddresses,
       );
 
-      final approved = await showDialog<bool>(
+      final approved = await ClearTransactionConfirmationDialog.show(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text(
-            purchase
-                ? 'Confirmar pagamento da compra'
-                : 'Confirmar envio seguro',
-          ),
-          content: SingleChildScrollView(
-            child: SelectableText(
-              'Rede: $_networkLabel\n\n'
-              '${draft.name == null ? '' : 'Tipo de pagamento: ${draft.name}\n\n'}'
-              '• REMETENTE:\n'
-              'Usuário: ${account.name} (${account.username})\n'
-              'ID Soberano: ${account.uniqueId}\n'
-              'Emojis de Segurança: $myEmojis\n'
-              'Chave Pública: ${account.publicAddress}\n\n'
-              '• DESTINATÁRIO (QUEM VAI RECEBER):\n'
-              'Usuário / Contato: ${recipientUser ?? "Usuário Externo On-Chain"}\n'
-              '🛡️ Emojis de Conferência: $targetEmojis\n'
-              'Chave Pública de Destino: ${transfer.to}\n\n'
-              '${hasPoisonRisk ? "⚠️ ALERTA ANTI-GOLPE: Risco de Address Poisoning detectado! Este endereço tem início e fim parecidos com um contato salvo, mas é DIFERENTE. Confira os emojis com o recebedor antes de enviar!\n\n" : ""}'
-              '• VALORES:\n'
-              'Valor: ${_formatAmount(transfer.amount)} $symbol\n'
-              'Taxa máxima: ${_formatAmount(fee)} $symbol\n'
-              'Total máximo: ${_formatAmount(transfer.amount + fee)} $symbol',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Confirmar e Enviar'),
-            ),
-          ],
-        ),
+        account: account,
+        networkLabel: _networkLabel,
+        recipientAddress: transfer.to,
+        recipientName: recipientUser,
+        amount: transfer.amount,
+        fee: fee,
+        symbol: symbol,
+        fiatCurrency: _fiatCurrency,
+        paymentType: draft.name,
+        hasPoisonRisk: hasPoisonRisk,
+        isPurchase: purchase,
       );
       if (approved != true || !mounted) return;
       final result = await prepared.send();
@@ -993,6 +1002,76 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     );
   }
 
+  /// Abre a tela de Troca de Moedas (Swap BTC ⇄ ETH).
+  Future<void> _openSwap({String? fromSymbol}) async {
+    if (_busy || _accounts.isEmpty) return;
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CryptoSwapScreen(
+          controller: _controller,
+          account: _account,
+          network: _network,
+          fiatCurrency: _fiatCurrency,
+          initialFromSymbol: fromSymbol,
+          onSwapSuccess: () {
+            _refreshBalance(force: true);
+            _refreshPortfolio(force: true);
+          },
+        ),
+      ),
+    );
+    if (mounted && _accounts.isNotEmpty) {
+      setState(() {
+        _refreshBalance(force: true);
+        _refreshPortfolio(force: true);
+      });
+    }
+  }
+
+  /// Abre a Central de Gastos Cripto no Dia a Dia (Gift cards, boletos e recargas).
+  Future<void> _openSpendingHub() async {
+    if (_busy || _accounts.isEmpty) return;
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CryptoSpendingScreen(
+          controller: _controller,
+          account: _account,
+          network: _network,
+          fiatCurrency: _fiatCurrency,
+          onSpendingSuccess: () {
+            _refreshBalance(force: true);
+            _refreshPortfolio(force: true);
+          },
+        ),
+      ),
+    );
+    if (mounted && _accounts.isNotEmpty) {
+      setState(() {
+        _refreshBalance(force: true);
+        _refreshPortfolio(force: true);
+      });
+    }
+  }
+
+  /// Abre o gerenciador multichain descomplicado de ativos.
+  void _openMultichainManager() {
+    if (_accounts.isEmpty) return;
+    MultichainAssetManagerDialog.show(
+      context: context,
+      account: _account,
+      controller: _controller,
+      network: _network,
+      fiatCurrency: _fiatCurrency,
+      onSelectAsset: (asset) async {
+        await _controller.setActiveAsset(asset);
+        if (mounted && _accounts.isNotEmpty) setState(_refreshBalance);
+      },
+      onSwapRequested: _openSwap,
+    );
+  }
+
   /// Abre o ponto de venda para criar uma cobrança com cálculo de equivalência em criptomoeda.
   Future<void> _openPos() async {
     if (_busy || _accounts.isEmpty) return;
@@ -1185,47 +1264,19 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     _notify('Carteira removida deste aparelho.');
   }, 'Não foi possível remover a carteira.');
 
-  /// Abre o fluxo de cópia de segurança.
+  /// Abre o fluxo de cópia de segurança e frase de recuperação (BIP-39).
   Future<void> _backup() => _action(() async {
-    final reveal = await showDialog<bool>(
+    final secret = _account.secret;
+    if (secret == null) {
+      _notify('Esta carteira é de observação (Watch-only) e não possui chaves de recuperação.');
+      return;
+    }
+    await RecoveryPhraseDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Mostrar chave de recuperação?'),
-        content: const Text(
-          'Qualquer pessoa com esta chave pode movimentar os fundos. Guarde uma cópia em local seguro.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Mostrar chave'),
-          ),
-        ],
-      ),
+      hexSecret: secret,
+      accountName: _account.name,
     );
-    if (!mounted || reveal != true) return;
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Chave privada'),
-        content: SelectableText(
-          _account.bitcoinChain == null
-              ? '0x${_account.secret}'
-              : _account.secret!,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Ocultar'),
-          ),
-        ],
-      ),
-    );
-  }, 'Não foi possível mostrar a chave.');
+  }, 'Não foi possível exibir a frase de recuperação.');
 
   /// Monta a interface a partir do estado atual e do tema do contexto.
   @override
@@ -2026,6 +2077,34 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
   Widget _modernServicesGrid() {
     final services = [
       _ServiceItem(
+        icon: Icons.currency_exchange_rounded,
+        color: const Color(0xFF10B981),
+        title: 'Troca de Moedas (Swap)',
+        subtitle: 'Troque BTC/Satoshis por ETH',
+        onTap: _openSwap,
+      ),
+      _ServiceItem(
+        icon: Icons.storefront_rounded,
+        color: Colors.pinkAccent,
+        title: 'Gastar Cripto',
+        subtitle: 'Gift cards, boletos e recargas',
+        onTap: _openSpendingHub,
+      ),
+      _ServiceItem(
+        icon: Icons.hub_rounded,
+        color: Colors.blueAccent,
+        title: 'Multichain',
+        subtitle: 'Todas as moedas em 1 só lugar',
+        onTap: _openMultichainManager,
+      ),
+      _ServiceItem(
+        icon: Icons.key_rounded,
+        color: Colors.amber,
+        title: 'Frase de Segurança',
+        subtitle: 'Backup de 12 ou 24 palavras',
+        onTap: _backup,
+      ),
+      _ServiceItem(
         icon: Icons.qr_code_rounded,
         color: const Color(0xFF627EEA),
         title: 'Cobrar com QR',
@@ -2400,6 +2479,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
           },
           onSend: _busy ? null : _send,
           onReceive: _busy ? null : _receive,
+          onSwap: _busy ? null : _openSwap,
           onStatement: _busy ? null : _openStatement,
           onFinance: _busy ? null : _openFinance,
           onPurchases: _busy ? null : () => _history(purchases: true),

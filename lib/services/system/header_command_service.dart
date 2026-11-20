@@ -14,6 +14,10 @@ class HeaderCommandService {
   // Callbacks fornecidos pelo painel da carteira (WalletHome)
   VoidCallback? onOpenSend;
   VoidCallback? onOpenReceive;
+  VoidCallback? onOpenSwap;
+  VoidCallback? onOpenSpending;
+  VoidCallback? onOpenMultichain;
+  VoidCallback? onOpenRecoveryPhrase;
   VoidCallback? onOpenStatement;
   VoidCallback? onOpenFinance;
   VoidCallback? onOpenPos;

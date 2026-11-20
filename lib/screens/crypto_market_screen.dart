@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/market_asset.dart';
 import '../services/crypto_market_service.dart';
+import '../services/system/header_command_service.dart';
 import '../widgets/wallet_layout.dart';
 
 class CryptoMarketScreen extends StatefulWidget {
@@ -491,17 +492,50 @@ class _CryptoMarketScreenState extends State<CryptoMarketScreen> {
                     color: colors.onSurfaceVariant,
                   ),
                 ),
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if ((asset.symbol == 'BTC' || asset.symbol == 'ETH') &&
+                        HeaderCommandService.instance.onOpenSwap != null)
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          HeaderCommandService.instance.onOpenSwap?.call();
+                        },
+                        icon: const Icon(
+                          Icons.currency_exchange_rounded,
+                          size: 15,
+                          color: Color(0xFF10B981),
+                        ),
+                        label: const Text(
+                          'Trocar',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF10B981),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => _openCreateAlertDialog(asset.symbol),
+                      icon: const Icon(Icons.notification_add_outlined, size: 16),
+                      label: const Text('Alerta', style: TextStyle(fontSize: 12)),
                     ),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () => _openCreateAlertDialog(asset.symbol),
-                  icon: const Icon(Icons.notification_add_outlined, size: 16),
-                  label: const Text('Alerta', style: TextStyle(fontSize: 12)),
+                  ],
                 ),
               ],
             ),

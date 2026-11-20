@@ -573,9 +573,9 @@ class _WalletAccountScreenState extends State<WalletAccountScreen> {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(Icons.key_outlined, color: colors.primary),
-                      title: const Text('Chave de Recuperação / Backup'),
+                      title: const Text('Frase de Recuperação (BIP-39) / Chaves'),
                       subtitle: const Text(
-                        'Visualize sua chave privada com segurança',
+                        'Visualize suas 12 ou 24 palavras e chave mestra com segurança',
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: widget.onBackupRequested,
