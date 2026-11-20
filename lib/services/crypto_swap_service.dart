@@ -48,7 +48,7 @@ class SwapQuote {
   String get formattedFrom {
     if (fromSymbol == 'BTC') {
       if (btcUnit == BitcoinUnit.satoshis) {
-        return '${_formatWithThousands(fromAmount.toInt())} sats';
+        return '${formatWithThousands(fromAmount.toInt())} sats';
       }
       return '${formatBtc(fromAmount)} BTC';
     }
@@ -61,7 +61,7 @@ class SwapQuote {
       if (btcUnit == BitcoinUnit.satoshis) {
         return '≈ ${formatBtc(fromAmount)} BTC';
       }
-      return '≈ ${_formatWithThousands(fromAmount.toInt())} satoshis';
+      return '≈ ${formatWithThousands(fromAmount.toInt())} satoshis';
     }
     return null;
   }
@@ -70,7 +70,7 @@ class SwapQuote {
   String get formattedTo {
     if (toSymbol == 'BTC') {
       if (btcUnit == BitcoinUnit.satoshis) {
-        return '${_formatWithThousands(toAmount.toInt())} sats';
+        return '${formatWithThousands(toAmount.toInt())} sats';
       }
       return '${formatBtc(toAmount)} BTC';
     }
@@ -83,7 +83,7 @@ class SwapQuote {
       if (btcUnit == BitcoinUnit.satoshis) {
         return '≈ ${formatBtc(toAmount)} BTC';
       }
-      return '≈ ${_formatWithThousands(toAmount.toInt())} satoshis';
+      return '≈ ${formatWithThousands(toAmount.toInt())} satoshis';
     }
     return null;
   }
@@ -92,7 +92,7 @@ class SwapQuote {
   String get formattedFee {
     if (toSymbol == 'BTC') {
       return btcUnit == BitcoinUnit.satoshis
-          ? '${_formatWithThousands(protocolFee.toInt())} sats'
+          ? '${formatWithThousands(protocolFee.toInt())} sats'
           : '${formatBtc(protocolFee)} BTC';
     }
     return '${formatEth(protocolFee)} ETH';
@@ -102,13 +102,14 @@ class SwapQuote {
   String get formattedMinReceived {
     if (toSymbol == 'BTC') {
       return btcUnit == BitcoinUnit.satoshis
-          ? '${_formatWithThousands(minReceived.toInt())} sats'
+          ? '${formatWithThousands(minReceived.toInt())} sats'
           : '${formatBtc(minReceived)} BTC';
     }
     return '${formatEth(minReceived)} ETH';
   }
 
-  static String _formatWithThousands(int number) {
+  /// Formata um número inteiro com separador de milhares por ponto.
+  static String formatWithThousands(int number) {
     final str = number.toString();
     final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     return str.replaceAllMapped(reg, (Match m) => '${m[1]}.');

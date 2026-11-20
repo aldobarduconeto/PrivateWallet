@@ -169,15 +169,6 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
     return _account.bitcoinChain?.label ?? _network.label;
   }
 
-  /// Formata o valor.
-  String _formatAmount(BigInt amount) {
-    if (_accounts.isEmpty) return formatEth(amount);
-    final isBtc = _account.isMultiCoin
-        ? _account.activeAsset == 'BTC'
-        : _account.bitcoinChain != null;
-    return isBtc ? formatBtc(amount) : formatEth(amount);
-  }
-
   /// Prepara a solicitação de pagamento para compartilhar.
   String _paymentRequest(String address, BigInt? amount) {
     if (_accounts.isEmpty) return '';
@@ -756,10 +747,6 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver {
       final fee = prepared.fee;
       if (!mounted) return;
       final recipientUser = _contactName(transfer.to);
-      final targetEmojis = SecurityShieldService.visualEmojis(transfer.to);
-      final myEmojis = SecurityShieldService.visualEmojis(
-        account.publicAddress,
-      );
       final knownAddresses = _contacts.value.map((c) => c.address).toList();
       final hasPoisonRisk = SecurityShieldService.isPoisoningRisk(
         targetAddress: transfer.to,

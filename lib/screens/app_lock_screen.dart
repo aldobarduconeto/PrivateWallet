@@ -355,6 +355,8 @@ class _AppLockScreenState extends State<AppLockScreen> {
         ),
       ),
     );
+  }
+
   Widget _buildPinKeypad(ColorScheme colors) {
     Widget pinBtn(String label, {IconData? icon, VoidCallback? onTap}) {
       return Material(

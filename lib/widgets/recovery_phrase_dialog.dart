@@ -83,7 +83,6 @@ class _RecoveryPhraseDialogState extends State<RecoveryPhraseDialog> {
 
     final options = <String>{correctWord};
     while (options.length < 4) {
-      final randIdx = rnd.nextInt(Bip39Service.totalWords);
       options.add(Bip39Service.generateMnemonic(words: 12).split(' ').first);
     }
 
@@ -95,17 +94,10 @@ class _RecoveryPhraseDialogState extends State<RecoveryPhraseDialog> {
 
   Future<void> _copyPhrase() async {
     final phrase = _currentWords.join(' ');
-    await Clipboard.setData(ClipboardData(text: phrase));
-    ClipboardGuardService.arm(phrase);
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Frase de recuperação copiada para a área de transferência. A área será limpa automaticamente por segurança.',
-        ),
-        backgroundColor: Colors.teal,
-      ),
+    await ClipboardGuardService.copySensitive(
+      context: context,
+      text: phrase,
+      label: 'Frase de recuperação',
     );
   }
 

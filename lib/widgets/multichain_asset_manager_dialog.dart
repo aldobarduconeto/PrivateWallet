@@ -19,7 +19,7 @@ class MultichainAssetManagerDialog extends StatelessWidget {
     required this.account,
     required this.controller,
     required this.network,
-    this.fiatCurrency = const FiatCurrency('BRL', 'R\$', 'Real Brasileiro'),
+    this.fiatCurrency = FiatCurrency.brl,
     this.onSelectAsset,
     this.onSwapRequested,
   });
@@ -36,7 +36,7 @@ class MultichainAssetManagerDialog extends StatelessWidget {
     required WalletAccount account,
     required WalletController controller,
     required Network network,
-    FiatCurrency fiatCurrency = const FiatCurrency('BRL', 'R\$', 'Real Brasileiro'),
+    FiatCurrency fiatCurrency = FiatCurrency.brl,
     ValueChanged<String>? onSelectAsset,
     VoidCallback? onSwapRequested,
   }) {

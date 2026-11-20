@@ -7,10 +7,8 @@ import '../controllers/wallet_controller.dart';
 import '../models/fiat_currency.dart';
 import '../models/networks.dart';
 import '../models/wallet_account.dart';
-import '../services/crypto_finance_service.dart';
 import '../services/crypto_swap_service.dart';
 import '../services/system/notification_service.dart';
-import '../theme/wallet_theme.dart';
 import '../widgets/crypto_receipt_dialog.dart';
 import '../widgets/wallet_layout.dart';
 import '../widgets/wallet_widgets.dart';
@@ -21,7 +19,7 @@ class CryptoSwapScreen extends StatefulWidget {
     required this.controller,
     required this.account,
     required this.network,
-    this.fiatCurrency = const FiatCurrency('BRL', 'R\$', 'Real Brasileiro'),
+    this.fiatCurrency = FiatCurrency.brl,
     this.initialFromSymbol,
     this.onSwapSuccess,
   });
@@ -48,7 +46,6 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
 
   BigInt _btcBalance = BigInt.zero;
   BigInt _ethBalance = BigInt.zero;
-  bool _loadingBalances = true;
   bool _isSwapping = false;
 
   SwapQuote? _currentQuote;
@@ -95,7 +92,6 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
         setState(() {
           _btcBalance = btc;
           _ethBalance = eth;
-          _loadingBalances = false;
         });
       }
     } catch (_) {
@@ -105,7 +101,6 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
               widget.controller.lastKnownBalanceForSymbol('BTC') ?? BigInt.zero;
           _ethBalance =
               widget.controller.lastKnownBalanceForSymbol('ETH') ?? BigInt.zero;
-          _loadingBalances = false;
         });
       }
     }
@@ -503,7 +498,6 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final isDesktop = MediaQuery.sizeOf(context).width >= 720;
 
     return WalletScaffold(
       appBar: AppBar(
@@ -717,7 +711,7 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
                   ),
                 ),
                 Text(
-                  '1 BTC ≈ ${btcToEth.toStringAsFixed(2)} ETH   •   1 ETH ≈ ${SwapQuote._formatWithThousands(ethToSats.toInt())} satoshis',
+                  '1 BTC ≈ ${btcToEth.toStringAsFixed(2)} ETH   •   1 ETH ≈ ${SwapQuote.formatWithThousands(ethToSats.toInt())} satoshis',
                   style: TextStyle(
                     fontSize: 11.5,
                     color: colors.onSurface.withValues(alpha: 0.8),
@@ -737,7 +731,7 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
     final bal = _activeSourceBalance;
     final balText = isBtc
         ? (_btcUnit == BitcoinUnit.satoshis
-              ? '${SwapQuote._formatWithThousands(bal.toInt())} sats'
+              ? '${SwapQuote.formatWithThousands(bal.toInt())} sats'
               : '${formatBtc(bal)} BTC')
         : '${formatEth(bal)} ETH';
 
@@ -1007,7 +1001,7 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
     final bal = _activeTargetBalance;
     final balText = isBtc
         ? (_btcUnit == BitcoinUnit.satoshis
-              ? '${SwapQuote._formatWithThousands(bal.toInt())} sats'
+              ? '${SwapQuote.formatWithThousands(bal.toInt())} sats'
               : '${formatBtc(bal)} BTC')
         : '${formatEth(bal)} ETH';
 
@@ -1199,7 +1193,7 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
           ),
           _summaryRow(
             'Equivalência em Satoshis:',
-            '1 ETH ≈ ${SwapQuote._formatWithThousands(CryptoSwapService.ethToSatoshis.toInt())} sats',
+            '1 ETH ≈ ${SwapQuote.formatWithThousands(CryptoSwapService.ethToSatoshis.toInt())} sats',
           ),
           _summaryRow('Taxa de Protocolo (0,25%):', quote.formattedFee),
           _summaryRow(

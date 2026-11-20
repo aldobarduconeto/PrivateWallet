@@ -11,7 +11,6 @@ import '../models/wallet_account.dart';
 import '../models/wallet_activity.dart';
 import '../services/crypto_finance_service.dart';
 import '../services/system/notification_service.dart';
-import '../theme/wallet_theme.dart';
 import '../widgets/crypto_receipt_dialog.dart';
 import '../widgets/wallet_layout.dart';
 import '../widgets/wallet_widgets.dart';
@@ -43,7 +42,7 @@ class CryptoSpendingScreen extends StatefulWidget {
     required this.controller,
     required this.account,
     required this.network,
-    this.fiatCurrency = const FiatCurrency('BRL', 'R\$', 'Real Brasileiro'),
+    this.fiatCurrency = FiatCurrency.brl,
     this.onSpendingSuccess,
   });
 
@@ -65,7 +64,6 @@ class _CryptoSpendingScreenState extends State<CryptoSpendingScreen>
 
   BigInt _btcBalance = BigInt.zero;
   BigInt _ethBalance = BigInt.zero;
-  bool _loading = true;
 
   static const _giftCards = [
     _GiftCardProduct(
@@ -142,7 +140,6 @@ class _CryptoSpendingScreenState extends State<CryptoSpendingScreen>
   }
 
   Future<void> _loadBalances() async {
-    setState(() => _loading = true);
     try {
       final btc = widget.controller.lastKnownBalanceForSymbol('BTC') ??
           await widget.controller.balanceForSymbol('BTC');
@@ -152,12 +149,9 @@ class _CryptoSpendingScreenState extends State<CryptoSpendingScreen>
         setState(() {
           _btcBalance = btc;
           _ethBalance = eth;
-          _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
-    }
+    } catch (_) {}
   }
 
   void _buyGiftCard(_GiftCardProduct product, double valBrl) {
