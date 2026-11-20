@@ -80,7 +80,6 @@ class _CryptoSwapScreenState extends State<CryptoSwapScreen> {
   }
 
   Future<void> _loadBalances() async {
-    setState(() => _loadingBalances = true);
     try {
       final btc =
           widget.controller.lastKnownBalanceForSymbol('BTC') ??
